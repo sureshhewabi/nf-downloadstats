@@ -8,5 +8,5 @@ LOG_FILE="${LOG_FOLDER}${RUN_NAME}_nextflow.log"
 ${NEXTFLOW}nextflow -log $LOG_FILE run ${PIPELINE_BASE_DIR}main.nf \
               -name $RUN_NAME \
               --nextflow_location $NEXTFLOW \
-              --root_dir $ROOT_DIR \
+              --root_dir $DATA_ROOT_DIR \
               --log_file $LOG_FILE
