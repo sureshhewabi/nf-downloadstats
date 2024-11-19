@@ -23,3 +23,5 @@ Thumbs.db
 log/
 work/
 .nextflow
+runStat.sh
+params.config

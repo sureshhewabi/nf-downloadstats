@@ -11,7 +11,7 @@
  * Define the default parameters
  */
 params.root_dir=''
-params.output_file=''
+params.output_file='parsed_data.parquet'
 params.log_file=''
 
 
@@ -43,8 +43,9 @@ Date                : ${new java.util.Date()}
     input:
     val root_dir
     val output_file
-//     output:
-//     file "${output_file}" into output_parquet
+
+    output:
+    file "${output_file}"
 
     script:
     """
@@ -54,8 +55,21 @@ Date                : ${new java.util.Date()}
     """
  }
 
-// Workflow definition
+ process get_stat_from_parquet_files {
+    input:
+    path parquet_file
+
+    output:
+    file "stat.tsv"
+
+     script:
+     """
+     python3 $workflow.projectDir/filedownloadstat/main.py stat \
+     -f $parquet_file \
+     -o "stat.tsv" \
+     """
+ }
+
 workflow {
-    // Pass the parameters to the process
-    output_parquet = read_logs_and_generate_parquets(params.root_dir, params.output_file)
+    read_logs_and_generate_parquets(params.root_dir, params.output_file) | get_stat_from_parquet_files
 }
