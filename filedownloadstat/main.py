@@ -48,14 +48,19 @@ def read_parquet_files(file: str):
     "stat",
     short_help="Generate stats from all the parquet files",
 )
-@click.option(
-    "--file",
-    help="Parquet file to generate stats",
-    required=True,
-)
-def get_stat_from_parquet_files(file):
+@click.option("-f",
+              "--file",
+              help="Parquet file to generate stats",
+              required=True,
+              )
+@click.option("-o",
+              "--output",
+              help="Generated stats file",
+              required=True,
+              )
+def get_stat_from_parquet_files(file, output: str):
     stat_parquet = StatParquet()
-    result = stat_parquet.count_records_by_accession(file)
+    result = stat_parquet.count_records_by_accession(file, output)
     print(result)
 
 

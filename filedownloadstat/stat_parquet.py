@@ -7,10 +7,11 @@ class StatParquet:
     def __init__(self):
         pass
 
-    def count_records_by_accession(self,parquet_folder):
+    def count_records_by_accession(self, parquet_folder: str, output: str):
         """
         Count the number of records for each accession across multiple Parquet files.
 
+        :param output: Path to the output TSV file with statistics.
         :param parquet_folder: Path to the folder containing Parquet files.
         :return: A DataFrame with accession and their respective counts.
         """
@@ -30,4 +31,7 @@ class StatParquet:
 
         # Convert the counts dictionary to a DataFrame
         result_df = pd.DataFrame(list(accession_counts.items()), columns=['accession', 'record_count'])
+        # Write the result DataFrame to a TSV file
+        result_df.to_csv(output, sep='\t', index=False)
+        print(f"Results written to {output}")
         return result_df

@@ -1,0 +1,30 @@
+image: maven:3.3.9-jdk-8-alpine
+
+deploy:
+  environment: prod
+  before_script:
+    - apk add --update openssh-client bash openssl rsync gettext tzdata
+    - eval $(ssh-agent -s)
+    - mkdir ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo $SSH_KEY | base64 -d | tr -d '\r' | ssh-add - > /dev/null
+    - DEPLOY_SERVERS_ARRAY=(`echo $DEPLOY_SERVER | tr ',' ' '`)
+    - for i in "${DEPLOY_SERVERS_ARRAY[@]}"; do ssh-keyscan $i >> ~/.ssh/known_hosts; chmod 600 ~/.ssh/*; done
+  script:
+    - envsubst < .params.config > params.config
+    - envsubst '${NEXTFLOW},${PIPELINE_BASE_DIR},${LOG_FOLDER},${ARCHIVE_ROOT_DIR}' < scripts/.runStat.sh > scripts/runStat.sh
+    - DEPLOY_DIR=$(date +"%Y%m%d_%H%M%S")
+    - mkdir $DEPLOY_DIR
+    - cp -r scripts $DEPLOY_DIR/
+    - cp -r templates $DEPLOY_DIR/
+    - cp -r *.config $DEPLOY_DIR/
+    - cp -r *.yml $DEPLOY_DIR/
+    - cp -r *.nf $DEPLOY_DIR/
+    - cp -r *.sh $DEPLOY_DIR/
+    - ls $DEPLOY_DIR
+    - cd $DEPLOY_DIR && chmod 755 *.sh scripts/* && cd ..
+    - ssh $SERVER_USER@$DEPLOY_SERVER "bash && mkdir -p $DEPLOY_PATH"
+    - rsync -a $DEPLOY_DIR $SERVER_USER@$DEPLOY_SERVER:$DEPLOY_PATH/
+    - ssh $SERVER_USER@$DEPLOY_SERVER "bash && cd $DEPLOY_PATH && ln -snf $DEPLOY_DIR $SYMLINK"
+  when: manual
+  allow_failure: false
