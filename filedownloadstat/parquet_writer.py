@@ -45,7 +45,9 @@ class ParquetWriter:
                     root_path=parquet_output,
                     # partition_cols=['year', 'month'],  # Specify partition columns
                     compression=COMPRESSION)
+                is_data_written = True
             else:
-                print("No data found to write!")
+                is_data_written = False
         except Exception as e:
             raise ValueError(e.with_traceback())
+        return is_data_written

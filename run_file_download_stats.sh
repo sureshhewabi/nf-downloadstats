@@ -4,8 +4,8 @@
 . /etc/profile.d/slurm.sh
 
 ##### VARIABLES
-# the name to give to the LSF job (to be extended with additional info)
-JOB_NAME="File Downloads Statistics"
+# the name to give to the job - do not use spaces
+JOB_NAME="file-downloads-statistics"
 # memory limit
 MEMORY_LIMIT=8G
 #email notification
@@ -14,7 +14,7 @@ JOB_EMAIL="pride-report@ebi.ac.uk"
 
 ##### FUNCTIONS
 printUsage() {
-    echo "Description: a pipeline to calculate number of file downlaods"
+    echo "Description: a pipeline to calculate number of file downloads"
     echo "$ ./scripts/runFileDownloadStats.sh"
     echo ""
     echo "Usage: ./runFileDownloadStats.sh"
@@ -36,6 +36,4 @@ sbatch -t 7-0 \
      --mail-type=ALL \
      --mail-user=${JOB_EMAIL} \
      --job-name=${JOB_NAME} \
-     -o /dev/null \
-     -e /dev/null \
-     ${PIPELINE_BASE_DIR}/scripts/runStat.sh ${PROFILE}
+     ${PIPELINE_BASE_DIR}/scripts/run_stat.sh ${PROFILE}
