@@ -38,22 +38,18 @@ class LogParser:
         :param row:
         :return:
         """
-        DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-
+        DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
         try:
-            # Truncate nanoseconds to microseconds (keep only 6 digits in the fractional part)
-            if '.' in row[0]:
-                timestamp = row[0][:26] + 'Z'
-            else:
-                timestamp = row[0]
+            # Remove the 'Z' and parse as UTC
+            timestamp = row[0].rstrip('Z')
 
             # Parse the timestamp
-            parsed_time = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+            parsed_time = datetime.strptime(timestamp, DATETIME_FORMAT)
 
-            dt = datetime.strptime(parsed_time, DATETIME_FORMAT)
-            year = dt.year
-            month = dt.month
-            date = dt.date()
+            # Extract year, month, and date
+            year = parsed_time.year
+            month = parsed_time.month
+            date = parsed_time.date()
 
             return {
                 "date": date,  # Date

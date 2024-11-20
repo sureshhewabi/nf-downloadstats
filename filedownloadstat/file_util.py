@@ -20,7 +20,7 @@ class FileUtil:
         Process logs and generate Parquet files for each file in the specified access method directories.
         """
         for access_method in access_methods_folder_names:
-            method_directory = Path(root_directory) / access_method
+            method_directory = Path(root_directory) / access_method / "public"
             files = self.get_file_paths(str(method_directory))
 
             for file_path in files:
