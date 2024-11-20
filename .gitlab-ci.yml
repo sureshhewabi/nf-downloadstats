@@ -12,7 +12,7 @@ deploy:
     - for i in "${DEPLOY_SERVERS_ARRAY[@]}"; do ssh-keyscan $i >> ~/.ssh/known_hosts; chmod 600 ~/.ssh/*; done
   script:
     - envsubst < .params.config > params.config
-    - envsubst '${NEXTFLOW},${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR}' < scripts/.runStat.sh > scripts/runStat.sh
+    - envsubst '${NEXTFLOW},${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR}' < scripts/.run_stat.sh > scripts/run_stat.sh
     - DEPLOY_DIR=$(date +"%Y%m%d_%H%M%S")
     - mkdir $DEPLOY_DIR
     - cp -r scripts $DEPLOY_DIR/
