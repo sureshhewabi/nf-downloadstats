@@ -26,7 +26,8 @@ DATE=$(date +"%Y%m%d%H%M")
 ##### Change directory to where the script locate
 cd ${0%/*}
 
-PROFILE='slrum'
+conda activate nextflow
+PROFILE="conda"
 
 #### RUN it on the cluster #####
 sbatch -t 7-0 \
@@ -37,4 +38,4 @@ sbatch -t 7-0 \
      --job-name=${JOB_NAME} \
      -o /dev/null \
      -e /dev/null \
-     ${PIPELINE_BASE_DIR}/scripts/runStats.sh ${PROFILE}
+     ${PIPELINE_BASE_DIR}/scripts/runStat.sh ${PROFILE}
