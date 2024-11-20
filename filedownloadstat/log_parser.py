@@ -41,7 +41,16 @@ class LogParser:
         DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
         try:
-            dt = datetime.strptime(row[0], DATETIME_FORMAT)
+            # Truncate nanoseconds to microseconds (keep only 6 digits in the fractional part)
+            if '.' in row[0]:
+                timestamp = row[0][:26] + 'Z'
+            else:
+                timestamp = row[0]
+
+            # Parse the timestamp
+            parsed_time = datetime.strptime(timestamp, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+            dt = datetime.strptime(parsed_time, DATETIME_FORMAT)
             year = dt.year
             month = dt.month
             date = dt.date()

@@ -39,7 +39,8 @@ Date                : ${new java.util.Date()}
   * Read tsv.gz log files and genarate individual parquet files
   */
  process read_logs_and_generate_parquets {
-
+    time '1h'
+    memory '10 GB'
     input:
     val root_dir
     val output_file
@@ -56,6 +57,8 @@ Date                : ${new java.util.Date()}
  }
 
  process get_stat_from_parquet_files {
+    time '1h'
+    memory '2 GB'
     input:
     path parquet_file
 
