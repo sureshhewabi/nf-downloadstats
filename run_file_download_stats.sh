@@ -4,7 +4,7 @@
 . /etc/profile.d/slurm.sh
 
 ##### VARIABLES
-# the name to give to the LSF job (to be extended with additional info)
+# the name to give to the job - do not use spaces
 JOB_NAME="file-downloads-statistics"
 # memory limit
 MEMORY_LIMIT=8G

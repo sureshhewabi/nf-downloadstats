@@ -24,12 +24,15 @@ class FileUtil:
             files = self.get_file_paths(str(method_directory))
 
             for file_path in files:
-                # Parse logs
+                print(f"Parsing log file started: {file_path}")
                 lp = LogParser(file_path)
                 data = lp.parse_gzipped_tsv()
 
                 # Write to Parquet
                 parquet_writer = ParquetWriter(parquet_output_file)
-                parquet_writer.write(data, parquet_output_file)
+                is_data_written = parquet_writer.write(data, parquet_output_file)
 
-                print(f"Parquet file written to {parquet_output_file} for {file_path}")
+                if is_data_written:
+                    print(f"Parquet file written to {parquet_output_file} for {file_path}")
+                else:
+                    print(f"No data found to write :  {file_path}")
