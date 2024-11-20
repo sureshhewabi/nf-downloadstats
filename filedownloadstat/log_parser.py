@@ -21,13 +21,19 @@ class LogParser:
 
         try:
             with gzip.open(self.file_path, 'rt') as file:  # 'rt' mode for reading text
+                line_no = 0
                 for line in file:
+                    line_no += 1
                     line = line.replace('\\t', '\t')  # Replace literal '\t' with actual tab
                     row = line.strip().split('\t')  # Split each line by tab
-                    if row[3].startswith(PRIDE_BASE_PATH) and row[6].lower().strip() == 'complete':  # pass only PRIDE data and complete
-                        parsed_line = self.parse_row(row)
-                        if parsed_line:
-                            parsed_data.append(parsed_line)
+                    if len(row) == 13:
+                        if row[3].startswith(PRIDE_BASE_PATH) and row[6].lower().strip() == 'complete':  # pass only PRIDE data and complete
+                            parsed_line = self.parse_row(row)
+                            if parsed_line:
+                                parsed_data.append(parsed_line)
+                    else:
+                        print("WARNING----!!! Number of columns expected was 13 found ", len(row), " in line no ",
+                                        line_no, " and row is :", row)
         except Exception as e:
             raise e.with_traceback(sys.exc_info()[2])
         return parsed_data
