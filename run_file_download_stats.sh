@@ -36,4 +36,4 @@ sbatch -t 7-0 \
      --mail-type=ALL \
      --mail-user=${JOB_EMAIL} \
      --job-name=${JOB_NAME} \
-     ${PIPELINE_BASE_DIR}/scripts/run_stat.sh ${PROFILE}
+     ./scripts/run_stat.sh ${PROFILE}
