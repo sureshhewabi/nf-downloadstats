@@ -40,7 +40,7 @@ class LogParser:
         """
         DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
         try:
-            row[0] = '2024-09-13T23:58:17.000Z'
+           # eg: 2024-09-13T23:58:17.000Z / 2024-09-14T07:14:07.419698061Z
             if '.' in row[0]:
                 timestamp = row[0][:26] + 'Z'  # Keep only microseconds, then re-add 'Z'
             else:
