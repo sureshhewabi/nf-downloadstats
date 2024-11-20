@@ -23,7 +23,6 @@ printUsage() {
 
 DATE=$(date +"%Y%m%d%H%M")
 
-
 ##### Change directory to where the script locate
 cd ${0%/*}
 
