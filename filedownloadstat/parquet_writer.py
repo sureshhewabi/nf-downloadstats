@@ -43,7 +43,7 @@ class ParquetWriter:
                 pq.write_to_dataset(
                     table,
                     root_path=parquet_output,
-                    # partition_cols=['year', 'month'],  # Specify partition columns
+                    # partition_cols=['accession'],  # Specify partition columns
                     compression=COMPRESSION)
                 is_data_written = True
             else:

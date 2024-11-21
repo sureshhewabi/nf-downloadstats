@@ -1,6 +1,0 @@
-name: environment
-channels:
-  - conda-forge
-dependencies:
-  - pandas
-  - pyarrow

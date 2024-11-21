@@ -1,5 +1,6 @@
-import pandas as pd
-from pathlib import Path
+import glob
+import dask.dataframe as dd
+import os
 
 
 class StatParquet:
@@ -7,32 +8,48 @@ class StatParquet:
     def __init__(self):
         pass
 
-    def count_records_by_accession(self, parquet_folder: str, output: str):
-        """
-        Count the number of records for each accession across multiple Parquet files.
+    def get_file_counts(self, input_files, output_grouped, output_summed):
 
-        :param output: Path to the output TSV file with statistics.
-        :param parquet_folder: Path to the folder containing Parquet files.
-        :return: A DataFrame with accession and their respective counts.
-        """
-        parquet_files = Path(parquet_folder).glob("*.parquet")
-        accession_counts = {}
+        all_files = self.get_all_parquet_files(input_files)
+        # Load all parquet files into a Dask DataFrame
+        print(f"Loading {len(all_files)} Parquet files...")
+        ddf = dd.read_parquet(all_files)
 
-        for file in parquet_files:
-            # Read the Parquet file into a DataFrame
-            df = pd.read_parquet(file)
+        # Group by accession and filename to count occurrences
+        grouped = ddf.groupby(["accession", "filename"]).size().reset_index()
+        grouped = grouped.rename(columns={0: "file_count"})  # Rename the count column to 'file_count'
 
-            # Group by accession and count the records
-            counts = df.groupby('accession').size()
+        # Convert Dask DataFrame to Pandas DataFrame
+        grouped = grouped.compute()
 
-            # Update the global accession_counts dictionary
-            for accession, count in counts.items():
-                if str(accession).startswith("PXD"):
-                    accession_counts[accession] = accession_counts.get(accession, 0) + count
+        # Save to JSON (grouped counts)
+        grouped.to_json(output_grouped, orient='records', lines=True)
+        print(f"Grouped counts saved to {output_grouped}")
 
-        # Convert the counts dictionary to a DataFrame
-        result_df = pd.DataFrame(list(accession_counts.items()), columns=['accession', 'record_count'])
-        # Write the result DataFrame to a TSV file
-        result_df.to_csv(output, sep='\t', index=False)
-        print(f"Results written to {output}")
-        return result_df
+        # Group by accession and sum file counts
+        summed = grouped.groupby("accession", as_index=False)["file_count"].sum()
+
+        # Save to JSON (summed counts)
+        summed.to_json(output_summed, orient='records', lines=True)
+        print(f"Summed counts saved to {output_summed}")
+
+    def get_all_parquet_files(self, input_files):
+
+        all_parquet_files = []
+
+        # Loop over each directory or file path
+        for path in input_files.strip('[]').split(", "):
+            path = path.strip("'").strip()  # Clean up any extra spaces or quotes
+
+            # If it's a directory, find all parquet files in that directory and subdirectories
+            if os.path.isdir(path):
+                all_parquet_files.extend(glob.glob(os.path.join(path, '**', '*.parquet'), recursive=True))
+            # If it's a single file, just check if it's a parquet file
+            elif os.path.isfile(path) and path.endswith(".parquet"):
+                all_parquet_files.append(path)
+
+        if not all_parquet_files:
+            raise FileNotFoundError("No Parquet files found in the provided directories or file paths.")
+
+        return all_parquet_files
+

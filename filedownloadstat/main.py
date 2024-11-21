@@ -5,11 +5,15 @@ from parquet_reader import ParquetReader
 from stat_parquet import StatParquet
 from file_util import FileUtil
 
+# TODO: Need to remove this from here to config
 access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
+
+
 # access_methods_folder_names = ['ftp']
 
+
 @click.command("get_log_files",
-    short_help="get_log_files",)
+               short_help="get_log_files", )
 @click.option(
     "-r",
     "--root_dir",
@@ -29,7 +33,7 @@ def get_log_files(root_dir: str, output: str):
 
 
 @click.command("process_log_file",
-    short_help="process log_file",)
+               short_help="process log_file", )
 @click.option(
     "-f",
     "--tsvfilepath",
@@ -65,22 +69,24 @@ def read_parquet_files(file: str):
 
 
 @click.command(
-    "stat",
-    short_help="Generate stats from all the parquet files",
+    "get_file_counts",
+    short_help="Get file counts from parquet files",
 )
 @click.option("-f",
-              "--file",
-              help="Parquet file to generate stats",
+              "--input_dir",
               required=True,
               )
-@click.option("-o",
-              "--output",
-              help="Generated stats file",
+@click.option("-g",
+              "--output_grouped",
               required=True,
               )
-def get_stat_from_parquet_files(file, output: str):
+@click.option("-s",
+              "--output_summed",
+              required=True,
+              )
+def get_file_counts(input_dir, output_grouped, output_summed):
     stat_parquet = StatParquet()
-    result = stat_parquet.count_records_by_accession(file, output)
+    result = stat_parquet.get_file_counts(input_dir, output_grouped, output_summed)
     print(result)
 
 
@@ -89,10 +95,13 @@ def cli():
     pass
 
 
+# used features
 cli.add_command(get_log_files)
 cli.add_command(process_log_file)
+cli.add_command(get_file_counts)
+
+# additional features
 cli.add_command(read_parquet_files)
-cli.add_command(get_stat_from_parquet_files)
 
 if __name__ == "__main__":
     cli()
