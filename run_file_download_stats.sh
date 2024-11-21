@@ -7,7 +7,7 @@
 # the name to give to the job - do not use spaces
 JOB_NAME="file-downloads-statistics"
 # memory limit
-MEMORY_LIMIT=8G
+MEMORY_LIMIT=12G
 #email notification
 JOB_EMAIL="pride-report@ebi.ac.uk"
 

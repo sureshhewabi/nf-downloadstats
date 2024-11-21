@@ -36,7 +36,7 @@ Date                : ${new java.util.Date()}
  """
 
 process get_log_files {
-    // Define inputs and outputs
+
     input:
     val root_dir
 
@@ -52,6 +52,7 @@ process get_log_files {
 }
 
 process process_log_file {
+
     input:
     val file_path  // Each file object from the channel
 
@@ -68,37 +69,23 @@ process process_log_file {
     """
 }
 
-process get_stat_from_parquet_files {
+process analyze_parquet_files {
+
     input:
-    path parquet_file
+    val all_parquet_files  // A comma-separated string of file paths
 
     output:
-    path "*.stat.tsv"  // Output files with unique names
+    path "grouped_file_counts.tsv"
+    path "summed_accession_counts.tsv"
 
     script:
     """
-    # Extract a unique identifier from the Parquet file name
-    filename=\$(basename ${parquet_file} .parquet)
-    python3 $workflow.projectDir/filedownloadstat/main.py stat \
-        -f ${parquet_file} \
-        -o "\${filename}.stat.tsv"
+    python3 ${workflow.projectDir}/filedownloadstat/main.py get_file_counts \
+        --input_dir "${all_parquet_files}" \
+        --output_grouped grouped_file_counts.tsv \
+        --output_summed summed_accession_counts.tsv
     """
 }
-
-process combine_stat_files {
-    input:
-    path stat_files
-
-    output:
-    path "summary_stat.tsv"
-
-    script:
-    """
-    # Combine all stat.tsv files into one summary file without headers
-    awk 'NR == 1 || FNR > 1' ${stat_files.join(' ')} > summary_stat.tsv
-    """
-}
-
 
 
 workflow {
@@ -110,15 +97,14 @@ workflow {
         .set { file_path }          // Save the channel
 
     // Step 2: Process each log file and generate Parquet files
-    def parquet_files = process_log_file(file_path)
+    def all_parquet_files = process_log_file(file_path)
 
-    // Step 3: Process the generated Parquet files to calculate statistics
-    def stat_files = get_stat_from_parquet_files(parquet_files)
+    // Collect all parquet files into a single channel for analysis
+    all_parquet_files
+        .collect()                  // Collect all parquet files into a single list
+        .set { parquet_file_list }  // Save the collected files as a new channel
 
-    // Step 4: Combine all stat.tsv files into a single summary file
-    stat_files
-        .collect()  // Collect all `.stat.tsv` files into a single list
-        .set { all_stat_files }
+    // Step 3: Analyze Parquet files
+    analyze_parquet_files(parquet_file_list)
 
-    combine_stat_files(all_stat_files)
 }
