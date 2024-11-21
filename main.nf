@@ -35,44 +35,90 @@ Date                : ${new java.util.Date()}
 
  """
 
- /*
-  * Read tsv.gz log files and genarate individual parquet files
-  */
- process read_logs_and_generate_parquets {
-    time '24h'
-    memory '10 GB'
+process get_log_files {
+    // Define inputs and outputs
     input:
     val root_dir
-    val output_file
 
     output:
-    file "${output_file}"
+    path "file_list.txt"
 
     script:
     """
-     python3 $workflow.projectDir/filedownloadstat/main.py generate-parquet \
-     -r $root_dir \
-     -o $output_file
+    python3 ${workflow.projectDir}/filedownloadstat/main.py get_log_files \
+        --root_dir $root_dir \
+        --output "file_list.txt"
     """
- }
+}
 
- process get_stat_from_parquet_files {
-    time '1h'
-    memory '2 GB'
+process process_log_file {
+    input:
+    val file_path  // Each file object from the channel
+
+    output:
+    path "*.parquet",optional: true  // Output files with unique names
+
+    script:
+    """
+    # Extract a unique identifier from the log file name
+    filename=\$(basename ${file_path} .log.tsv.gz)
+    python3 ${workflow.projectDir}/filedownloadstat/main.py process_log_file \
+        -f ${file_path} \
+        -o "\${filename}.parquet"
+    """
+}
+
+process get_stat_from_parquet_files {
     input:
     path parquet_file
 
     output:
-    file "stat.tsv"
+    path "*.stat.tsv"  // Output files with unique names
 
-     script:
-     """
-     python3 $workflow.projectDir/filedownloadstat/main.py stat \
-     -f $parquet_file \
-     -o "stat.tsv" \
-     """
- }
+    script:
+    """
+    # Extract a unique identifier from the Parquet file name
+    filename=\$(basename ${parquet_file} .parquet)
+    python3 $workflow.projectDir/filedownloadstat/main.py stat \
+        -f ${parquet_file} \
+        -o "\${filename}.stat.tsv"
+    """
+}
+
+process combine_stat_files {
+    input:
+    path stat_files
+
+    output:
+    path "summary_stat.tsv"
+
+    script:
+    """
+    # Combine all stat.tsv files into one summary file without headers
+    awk 'NR == 1 || FNR > 1' ${stat_files.join(' ')} > summary_stat.tsv
+    """
+}
+
+
 
 workflow {
-    read_logs_and_generate_parquets(params.root_dir, params.output_file) | get_stat_from_parquet_files
+    // Step 1: Gather file names
+    def root_dir = params.root_dir
+    get_log_files(root_dir)
+        .splitText()                // Split file_list.txt into individual lines
+        .map { it.trim() }          // Trim any extra whitespace or newlines
+        .set { file_path }          // Save the channel
+
+    // Step 2: Process each log file and generate Parquet files
+    def parquet_files = process_log_file(file_path)
+
+    // Step 3: Process the generated Parquet files to calculate statistics
+    def stat_files = get_stat_from_parquet_files(parquet_files)
+
+    // Step 4: Combine all stat.tsv files into a single summary file
+    stat_files
+        .collect()  // Collect all `.stat.tsv` files into a single list
+        .set { all_stat_files }
+
+    combine_stat_files(all_stat_files)
 }

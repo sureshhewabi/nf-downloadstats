@@ -27,7 +27,8 @@ class StatParquet:
 
             # Update the global accession_counts dictionary
             for accession, count in counts.items():
-                accession_counts[accession] = accession_counts.get(accession, 0) + count
+                if str(accession).startswith("PXD"):
+                    accession_counts[accession] = accession_counts.get(accession, 0) + count
 
         # Convert the counts dictionary to a DataFrame
         result_df = pd.DataFrame(list(accession_counts.items()), columns=['accession', 'record_count'])
