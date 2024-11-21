@@ -10,7 +10,7 @@
 /*
  * Define the default parameters
  */
-params.root_dir='/Users/hewapathirana/Desktop/transfer_logs_privacy_ready'
+params.root_dir=''
 params.output_file='parsed_data.parquet'
 params.log_file=''
 

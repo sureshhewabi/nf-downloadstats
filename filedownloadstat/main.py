@@ -5,10 +5,8 @@ from parquet_reader import ParquetReader
 from stat_parquet import StatParquet
 from file_util import FileUtil
 
-# access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
-
-
-access_methods_folder_names = ['ftp']
+access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
+# access_methods_folder_names = ['ftp']
 
 @click.command("get_log_files",
     short_help="get_log_files",)
