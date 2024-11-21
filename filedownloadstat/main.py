@@ -5,11 +5,13 @@ from parquet_reader import ParquetReader
 from stat_parquet import StatParquet
 from file_util import FileUtil
 
-access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
-# access_methods_folder_names = ['fasp-aspera']
+# access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
 
 
-@click.command()
+access_methods_folder_names = ['ftp']
+
+@click.command("get_log_files",
+    short_help="get_log_files",)
 @click.option(
     "-r",
     "--root_dir",
@@ -19,12 +21,32 @@ access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
 @click.option(
     "-o",
     "--output",
-    help="root folder where all the log files are stored(i.e transfer_logs_privacy_ready)",
+    help="all the tsv log file paths written to this file",
     required=True,
 )
-def generate_parquet(root_dir: str, output: str):
+def get_log_files(root_dir: str, output: str):
     fileutil = FileUtil()
-    fileutil.process_access_methods(root_dir, access_methods_folder_names, output)
+    file_paths_list = fileutil.process_access_methods(root_dir, access_methods_folder_names, output)
+    return file_paths_list
+
+
+@click.command("process_log_file",
+    short_help="process log_file",)
+@click.option(
+    "-f",
+    "--tsvfilepath",
+    help="all the tsv log file paths written to this file",
+    required=True,
+)
+@click.option(
+    "-o",
+    "--output_parquet",
+    help="parquet file path to write individual file",
+    required=True,
+)
+def process_log_file(tsvfilepath, output_parquet):
+    fileutil = FileUtil()
+    fileutil.process_log_file(tsvfilepath, output_parquet)
 
 
 @click.command(
@@ -69,7 +91,8 @@ def cli():
     pass
 
 
-cli.add_command(generate_parquet)
+cli.add_command(get_log_files)
+cli.add_command(process_log_file)
 cli.add_command(read_parquet_files)
 cli.add_command(get_stat_from_parquet_files)
 
