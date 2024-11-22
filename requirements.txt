@@ -1,5 +1,0 @@
-pandas
-dask~=2024.11.2
-numpy
-pyarrow~=18.0.0
-click~=8.1.7
