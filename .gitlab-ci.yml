@@ -17,7 +17,7 @@ deploy:
     - mkdir $DEPLOY_DIR
     - cp -r scripts $DEPLOY_DIR/
     - cp -r *.config $DEPLOY_DIR/
-    - cp -r *.txt $DEPLOY_DIR/
+    - cp -r *.yml $DEPLOY_DIR/
     - cp -r *.nf $DEPLOY_DIR/
     - cp -r *.sh $DEPLOY_DIR/
     - cp -r filedownloadstat $DEPLOY_DIR/
