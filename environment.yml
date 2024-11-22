@@ -1,0 +1,17 @@
+name: file_download_stat
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - python=3.10
+  - dask=2023.1.0
+  - pandas=1.5.3
+  - pyarrow=10.0.1
+  - numpy=1.23.5
+  - glob2=0.7
+  - openjdk=17.0.13   # Compatible Java version for Nextflow
+  - pip=23.2.1
+  - pip:
+      - nextflow==22.10.6
+      - pyreadr==0.4.6
