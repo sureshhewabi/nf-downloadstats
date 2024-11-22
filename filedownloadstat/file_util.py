@@ -19,14 +19,14 @@ class FileUtil:
         root_path = Path(root_dir)
         return [str(file) for file in root_path.rglob("*.tsv.gz")]
 
-    def process_access_methods(self, root_directory, access_methods_folder_names, file_paths_list):
+    def process_access_methods(self, root_directory, protocol_folder_names, file_paths_list):
         """
         Process logs and generate Parquet files for each file in the specified access method directories.
         """
         file_paths = []
 
-        for access_method in access_methods_folder_names:
-            method_directory = Path(root_directory) / access_method / "public"
+        for protocol in protocol_folder_names:
+            method_directory = Path(root_directory) / protocol / "public"
             files = self.get_file_paths(str(method_directory))
 
             for file_path in files:

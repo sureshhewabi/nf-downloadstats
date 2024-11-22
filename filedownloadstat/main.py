@@ -6,10 +6,10 @@ from stat_parquet import StatParquet
 from file_util import FileUtil
 
 # TODO: Need to remove this from here to config
-access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
+protocols = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
 
 
-# access_methods_folder_names = ['ftp']
+# protocols = ['ftp']
 
 
 @click.command("get_log_files",
@@ -28,7 +28,7 @@ access_methods_folder_names = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
 )
 def get_log_files(root_dir: str, output: str):
     fileutil = FileUtil()
-    file_paths_list = fileutil.process_access_methods(root_dir, access_methods_folder_names, output)
+    file_paths_list = fileutil.process_access_methods(root_dir, protocols, output)
     return file_paths_list
 
 
