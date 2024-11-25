@@ -53,6 +53,9 @@ process get_log_files {
 
 process process_log_file {
 
+    cpus 2
+    memory '4 GB'
+
     input:
     val file_path  // Each file object from the channel
 
@@ -65,7 +68,8 @@ process process_log_file {
     filename=\$(basename ${file_path} .log.tsv.gz)
     python3 ${workflow.projectDir}/filedownloadstat/main.py process_log_file \
         -f ${file_path} \
-        -o "\${filename}.parquet"
+        -o "\${filename}.parquet" \
+        > process_log_file.log 2>&1
     """
 }
 
