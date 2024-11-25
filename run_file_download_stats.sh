@@ -27,7 +27,7 @@ DATE=$(date +"%Y%m%d%H%M")
 cd ${0%/*}
 
 conda activate file-download-stat
-PROFILE="conda"
+PROFILE="ebislurm"
 
 #### RUN it on the cluster #####
 sbatch -t 7-0 \
