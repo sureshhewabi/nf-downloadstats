@@ -80,8 +80,11 @@ process analyze_parquet_files {
 
     script:
     """
+    # Write the file paths to a temporary file, because otherwise Argument list(file list) will be too long
+    echo "${all_parquet_files.join('\n')}" > all_parquet_files_list.txt
+
     python3 ${workflow.projectDir}/filedownloadstat/main.py get_file_counts \
-        --input_dir "${all_parquet_files}" \
+        --input_dir all_parquet_files_list.txt \
         --output_grouped grouped_file_counts.tsv \
         --output_summed summed_accession_counts.tsv
     """

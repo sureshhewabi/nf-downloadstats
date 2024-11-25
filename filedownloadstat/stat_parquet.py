@@ -33,23 +33,31 @@ class StatParquet:
         summed.to_json(output_summed, orient='records', lines=True)
         print(f"Summed counts saved to {output_summed}")
 
-    def get_all_parquet_files(self, input_files):
-
+    def get_all_parquet_files(self, file_list_path):
+        """Read file paths from a text file and validate them as Parquet files."""
         all_parquet_files = []
 
-        # Loop over each directory or file path
-        for path in input_files.strip('[]').split(", "):
-            path = path.strip("'").strip()  # Clean up any extra spaces or quotes
+        # Read the file list
+        with open(file_list_path, 'r') as f:
+            file_paths = f.readlines()
 
-            # If it's a directory, find all parquet files in that directory and subdirectories
-            if os.path.isdir(path):
-                all_parquet_files.extend(glob.glob(os.path.join(path, '**', '*.parquet'), recursive=True))
-            # If it's a single file, just check if it's a parquet file
-            elif os.path.isfile(path) and path.endswith(".parquet"):
+        for path in file_paths:
+            path = path.strip()
+
+            # Check if the path is a valid Parquet file or directory
+            if os.path.isfile(path) and path.endswith('.parquet'):
                 all_parquet_files.append(path)
+            elif os.path.isdir(path):
+                # Handle directory containing Parquet dataset
+                dataset_files = [
+                    os.path.join(path, file)
+                    for file in os.listdir(path)
+                    if file.endswith('.parquet')
+                ]
+                all_parquet_files.extend(dataset_files)
 
         if not all_parquet_files:
-            raise FileNotFoundError("No Parquet files found in the provided directories or file paths.")
+            raise FileNotFoundError("No valid Parquet files found in the provided paths.")
 
         return all_parquet_files
 

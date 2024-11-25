@@ -26,7 +26,8 @@ DATE=$(date +"%Y%m%d%H%M")
 ##### Change directory to where the script locate
 cd ${0%/*}
 
-conda activate file-download-stat
+${CONDA_INIT}
+conda activate file_download_stat
 PROFILE="ebislurm"
 
 #### RUN it on the cluster #####
