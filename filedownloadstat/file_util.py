@@ -1,3 +1,5 @@
+import os
+import sys
 from pathlib import Path
 from log_parser import LogParser
 from parquet_writer import ParquetWriter
@@ -41,15 +43,26 @@ class FileUtil:
         return file_paths_list
 
     def process_log_file(self, file_path, parquet_output_file):
-        print(f"Parsing log file started: {file_path}")
-        lp = LogParser(file_path)
-        data = lp.parse_gzipped_tsv()
 
-        # Write to Parquet
-        parquet_writer = ParquetWriter(parquet_output_file)
-        is_data_written = parquet_writer.write(data, parquet_output_file)
+        try:
+            print(f"Parsing log file started: {file_path}")
 
-        if is_data_written:
-            print(f"Parquet file written to {parquet_output_file} for {file_path}")
-        else:
-            print(f"No data found to write :  {file_path}")
+            if not os.path.exists(file_path):
+                raise FileNotFoundError(f"Input file does not exist: {file_path}")
+
+            print(f"Parsing file and writing output to {parquet_output_file}")
+
+            lp = LogParser(file_path)
+            data = lp.parse_gzipped_tsv()
+
+            # Write to Parquet
+            parquet_writer = ParquetWriter(parquet_output_file)
+            is_data_written = parquet_writer.write(data, parquet_output_file)
+
+            if is_data_written:
+                print(f"Parquet file written to {parquet_output_file} for {file_path}")
+            else:
+                print(f"No data found to write :  {file_path}")
+        except Exception as e:
+            print(f"Error while processing file: {e}", file=sys.stderr)
+            sys.exit(1)
