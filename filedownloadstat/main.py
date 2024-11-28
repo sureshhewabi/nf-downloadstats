@@ -76,17 +76,17 @@ def read_parquet_files(file: str):
               "--input_dir",
               required=True,
               )
-@click.option("-g",
-              "--output_grouped",
-              required=True,
-              )
+# @click.option("-g",
+#               "--output_grouped",
+#               required=True,
+#               )
 @click.option("-s",
               "--output_summed",
               required=True,
               )
-def get_file_counts(input_dir, output_grouped, output_summed):
+def get_file_counts(input_dir, output_summed):
     stat_parquet = StatParquet()
-    result = stat_parquet.get_file_counts(input_dir, output_grouped, output_summed)
+    result = stat_parquet.get_file_counts(input_dir, output_summed)
     print(result)
 
 
