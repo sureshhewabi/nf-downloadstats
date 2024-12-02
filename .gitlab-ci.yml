@@ -12,7 +12,7 @@ deploy:
     - for i in "${DEPLOY_SERVERS_ARRAY[@]}"; do ssh-keyscan $i >> ~/.ssh/known_hosts; chmod 600 ~/.ssh/*; done
   script:
     - envsubst < .params.config > params.config
-    - envsubst '${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR}' < scripts/.run_stat.sh > scripts/run_stat.sh
+    - envsubst '${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR},${API_ENDPOINT_FILE_DOWNLOAD_PER_PROJECT},${API_ENDPOINT_HEADER}' < scripts/.run_stat.sh > scripts/run_stat.sh
     - envsubst '${CONDA_INIT}' < .run_file_download_stats.sh > run_file_download_stats.sh
     - DEPLOY_DIR=$(date +"%Y%m%d_%H%M%S")
     - mkdir $DEPLOY_DIR
@@ -23,6 +23,7 @@ deploy:
     - cp -r *.sh $DEPLOY_DIR/
     - cp -r filedownloadstat $DEPLOY_DIR/
     - cp -r conf $DEPLOY_DIR/
+    - cp -r params $DEPLOY_DIR/
     - ls $DEPLOY_DIR
     - cd $DEPLOY_DIR && chmod 755 *.sh scripts/* && cd ..
     - ssh $SERVER_USER@$DEPLOY_SERVER "bash && mkdir -p $DEPLOY_PATH"

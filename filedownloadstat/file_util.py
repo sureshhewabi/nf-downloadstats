@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -10,7 +11,6 @@ class FileUtil:
     def __init__(self):
         pass
 
-
     def get_file_paths(self, root_dir):
         """
         Traverse the directory tree and retrieve all file paths.
@@ -21,13 +21,14 @@ class FileUtil:
         root_path = Path(root_dir)
         return [str(file) for file in root_path.rglob("*.tsv.gz")]
 
-    def process_access_methods(self, root_directory, protocol_folder_names, file_paths_list):
+    def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list):
         """
         Process logs and generate Parquet files for each file in the specified access method directories.
         """
+
         file_paths = []
 
-        for protocol in protocol_folder_names:
+        for protocol in protocols:
             method_directory = Path(root_directory) / protocol / "public"
             files = self.get_file_paths(str(method_directory))
 

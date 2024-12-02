@@ -1,15 +1,10 @@
 import os
+
 import click
 
 from parquet_reader import ParquetReader
 from stat_parquet import StatParquet
 from file_util import FileUtil
-
-# TODO: Need to remove this from here to config
-protocols = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
-
-
-# protocols = ['ftp']
 
 
 @click.command("get_log_files",
@@ -26,9 +21,20 @@ protocols = ['fasp-aspera', 'gridftp-globus', 'http', 'ftp']
     help="all the tsv log file paths written to this file",
     required=True,
 )
-def get_log_files(root_dir: str, output: str):
+@click.option(
+    "-p",
+    "--protocols",
+    help="List of File Download protocols as appeared in the file system (i.e. fasp-aspera/gridftp-globus/http/ftp)",
+    required=True,
+    type=str
+)
+def get_log_files(root_dir: str, output: str, protocols: str):
+    protocol_list = protocols.split()
+    print(f"Root Directory: {root_dir}")
+    print(f"Output File: {output}")
+    print(f"Protocols: {protocol_list}")
     fileutil = FileUtil()
-    file_paths_list = fileutil.process_access_methods(root_dir, protocols, output)
+    file_paths_list = fileutil.process_access_methods(root_dir, output, protocol_list)
     return file_paths_list
 
 
