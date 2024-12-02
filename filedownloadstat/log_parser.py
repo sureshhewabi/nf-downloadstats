@@ -1,6 +1,8 @@
 import gzip
 import sys
 from datetime import datetime
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning, module="dask.dataframe")
 
 
 class LogParser:
@@ -8,8 +10,10 @@ class LogParser:
     Class to parse the log file into parquet format
     """
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, resource_list, completeness_list):
         self.file_path = file_path
+        self.RESOURCE_IDENTIFIERS = resource_list
+        self.completeness = completeness_list
 
     def parse_gzipped_tsv(self):
         """
@@ -17,23 +21,26 @@ class LogParser:
         :return:
         """
         parsed_data = []
-        PRIDE_BASE_PATH = '/pride/data/archive'
 
         try:
-            with gzip.open(self.file_path, 'rt') as file:  # 'rt' mode for reading text
+            with gzip.open(self.file_path, "rt", encoding="utf-8") as log_file:
                 line_no = 0
-                for line in file:
+                for line in log_file:
                     line_no += 1
                     line = line.replace('\\t', '\t')  # Replace literal '\t' with actual tab
                     row = line.strip().split('\t')  # Split each line by tab
                     if len(row) == 13:
-                        if row[3].startswith(PRIDE_BASE_PATH) and row[6].lower().strip() == 'complete':  # pass only PRIDE data and complete
-                            parsed_line = self.parse_row(row)
-                            if parsed_line:
-                                parsed_data.append(parsed_line)
+                        if any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS):
+                            if any(row[6].lower().strip() == comp for comp in self.completeness):
+                                parsed_line = self.parse_row(row)
+                                if parsed_line:
+                                    parsed_data.append(parsed_line)
                     else:
                         print("WARNING----!!! Number of columns expected was 13 found ", len(row), " in line no ",
                                         line_no, " and row is :", row)
+        except OSError as e:
+            print(f"Error reading file: {e}")
+            return None
         except Exception as e:
             raise e.with_traceback(sys.exc_info()[2])
         return parsed_data

@@ -52,9 +52,25 @@ def get_log_files(root_dir: str, output: str, protocols: str):
     help="parquet file path to write individual file",
     required=True,
 )
-def process_log_file(tsvfilepath, output_parquet):
+@click.option(
+    "-r",
+    "--resource",
+    help="List of identifiers(paths) in file URIs to identify resources from(Eg: /pride/data/archive)",
+    required=True,
+    type=str
+)
+@click.option(
+    "-c",
+    "--complete",
+    help="File download status can be complete or incomplete",
+    required=True,
+    type=str
+)
+def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str):
+    resource_list = resource.split()
+    completeness_list = complete.split()
     fileutil = FileUtil()
-    fileutil.process_log_file(tsvfilepath, output_parquet)
+    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list)
 
 
 @click.command(

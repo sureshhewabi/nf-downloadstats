@@ -3,3 +3,9 @@ protocols:
   - gridftp-globus
   - http
   - ftp
+public_private:
+  - public
+resource_identifiers:
+  - '/pride/data/archive'
+completeness:
+  - complete
