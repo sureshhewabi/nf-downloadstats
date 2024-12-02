@@ -8,7 +8,7 @@ class StatParquet:
     def __init__(self):
         pass
 
-    def get_file_counts(self, input_files, output_grouped, output_summed):
+    def get_file_counts(self, input_files, output_summed):
 
         all_files = self.get_all_parquet_files(input_files)
         # Load all parquet files into a Dask DataFrame
@@ -17,20 +17,20 @@ class StatParquet:
 
         # Group by accession and filename to count occurrences
         grouped = ddf.groupby(["accession", "filename"]).size().reset_index()
-        grouped = grouped.rename(columns={0: "file_count"})  # Rename the count column to 'file_count'
+        grouped = grouped.rename(columns={0: "count"})  # Rename the count column to 'count'
 
         # Convert Dask DataFrame to Pandas DataFrame
         grouped = grouped.compute()
 
         # Save to JSON (grouped counts)
-        grouped.to_json(output_grouped, orient='records', lines=True)
-        print(f"Grouped counts saved to {output_grouped}")
+        # grouped.to_json(output_grouped, orient='records', lines=False)
+        # print(f"Grouped counts saved to {output_grouped}")
 
         # Group by accession and sum file counts
-        summed = grouped.groupby("accession", as_index=False)["file_count"].sum()
+        summed = grouped.groupby("accession", as_index=False)["count"].sum()
 
         # Save to JSON (summed counts)
-        summed.to_json(output_summed, orient='records', lines=True)
+        summed.to_json(output_summed, orient='records', lines=False)
         print(f"Summed counts saved to {output_summed}")
 
     def get_all_parquet_files(self, file_list_path):

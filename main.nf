@@ -1,6 +1,6 @@
 /*
 ========================================================================================
-                 Validation Workflow for PRIDE Data
+                 FILE Download Statistics Workflow
 ========================================================================================
  @#### Authors
  Suresh Hewapathirana <sureshhewabi@gmail.com>
@@ -13,6 +13,9 @@
 params.root_dir=''
 params.output_file='parsed_data.parquet'
 params.log_file=''
+params.api_endpoint_file_download_per_project=''
+params.api_endpoint_header=''
+params.protocols=''
 
 
 log.info """\
@@ -32,6 +35,7 @@ SessionId           : $workflow.sessionId
 RunName             : $workflow.runName
 NextFlow version    : $nextflow.version
 Date                : ${new java.util.Date()}
+Protocols           : ${params.protocols}
 
  """
 
@@ -47,14 +51,14 @@ process get_log_files {
     """
     python3 ${workflow.projectDir}/filedownloadstat/main.py get_log_files \
         --root_dir $root_dir \
-        --output "file_list.txt"
+        --output "file_list.txt" \
+        --protocols '${params.protocols.join(" ")}'
     """
 }
 
 process process_log_file {
 
-    cpus 2
-    memory '4 GB'
+    label 'process_low'
 
     input:
     val file_path  // Each file object from the channel
@@ -79,8 +83,7 @@ process analyze_parquet_files {
     val all_parquet_files  // A comma-separated string of file paths
 
     output:
-    path "grouped_file_counts.tsv"
-    path "summed_accession_counts.tsv"
+    path "summed_accession_counts.json"
 
     script:
     """
@@ -89,8 +92,23 @@ process analyze_parquet_files {
 
     python3 ${workflow.projectDir}/filedownloadstat/main.py get_file_counts \
         --input_dir all_parquet_files_list.txt \
-        --output_grouped grouped_file_counts.tsv \
-        --output_summed summed_accession_counts.tsv
+        --output_summed summed_accession_counts.json
+    """
+}
+
+process uploadJsonFile {
+
+    input:
+    path jsonFile // The JSON file to upload
+
+    output:
+    path "upload_response.txt" // Capture the response from the server
+
+    script:
+    """
+    curl --location '${params.api_endpoint_file_download_per_project}' \
+    --header '${params.api_endpoint_header}' \
+    --form 'files=@\"${jsonFile}\"' > upload_response.txt
     """
 }
 
@@ -113,5 +131,9 @@ workflow {
 
     // Step 3: Analyze Parquet files
     analyze_parquet_files(parquet_file_list)
+        .set { jsonFile }           // Set JSON file output to a new channel
+
+    // Step 4: Upload the JSON file
+//     uploadJsonFile(jsonFile) // TODO: Only testing purpose
 
 }
