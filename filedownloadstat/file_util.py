@@ -1,4 +1,3 @@
-import json
 import os
 import sys
 from pathlib import Path
@@ -56,9 +55,12 @@ class FileUtil:
             lp = LogParser(file_path, resource_list, completeness_list)
             data = lp.parse_gzipped_tsv()
 
-            # Write to Parquet
-            parquet_writer = ParquetWriter(parquet_output_file)
-            is_data_written = parquet_writer.write(data, parquet_output_file)
+            if data is not None:
+                # Write to Parquet
+                parquet_writer = ParquetWriter(parquet_output_file)
+                is_data_written = parquet_writer.write(data, parquet_output_file)
+            else:
+                is_data_written = False
 
             if is_data_written:
                 print(f"Parquet file written to {parquet_output_file} for {file_path}")
