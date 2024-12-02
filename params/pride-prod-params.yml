@@ -1,0 +1,5 @@
+protocols:
+  - fasp-aspera
+  - gridftp-globus
+  - http
+  - ftp
