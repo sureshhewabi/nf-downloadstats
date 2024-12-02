@@ -36,6 +36,8 @@ RunName             : $workflow.runName
 NextFlow version    : $nextflow.version
 Date                : ${new java.util.Date()}
 Protocols           : ${params.protocols}
+Protocols           : ${params.resource_identifiers}
+Protocols           : ${params.completeness}
 
  """
 
@@ -73,6 +75,8 @@ process process_log_file {
     python3 ${workflow.projectDir}/filedownloadstat/main.py process_log_file \
         -f ${file_path} \
         -o "\${filename}.parquet" \
+        -r '${params.resource_identifiers.join(" ")}' \
+        -c '${params.completeness.join(" ")}' \
         > process_log_file.log 2>&1
     """
 }

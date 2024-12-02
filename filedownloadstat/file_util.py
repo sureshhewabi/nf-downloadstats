@@ -43,7 +43,7 @@ class FileUtil:
         print(f"File paths written to {file_paths_list}")
         return file_paths_list
 
-    def process_log_file(self, file_path, parquet_output_file):
+    def process_log_file(self, file_path, parquet_output_file, resource_list: list, completeness_list: list):
 
         try:
             print(f"Parsing log file started: {file_path}")
@@ -53,7 +53,7 @@ class FileUtil:
 
             print(f"Parsing file and writing output to {parquet_output_file}")
 
-            lp = LogParser(file_path)
+            lp = LogParser(file_path, resource_list, completeness_list)
             data = lp.parse_gzipped_tsv()
 
             # Write to Parquet
