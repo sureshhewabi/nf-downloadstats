@@ -8,6 +8,7 @@ API_ENDPOINT_FILE_DOWNLOAD_PER_PROJECT=$2
 API_ENDPOINT_HEADER=$3
 
 nextflow -log $LOG_FILE run ${PIPELINE_BASE_DIR}main.nf \
+              -params-file params/pride-$PROFILE-params.yml \
               -name $RUN_NAME \
               -profile $PROFILE \
               --nextflow_location "" \
