@@ -33,7 +33,7 @@ PROFILE="ebislurm"
 #### RUN it on the cluster #####
 sbatch -t 7-0 \
      --mem=${MEMORY_LIMIT} \
-     -p datamover \
+     -p standard \
      --mail-type=ALL \
      --mail-user=${JOB_EMAIL} \
      --job-name=${JOB_NAME} \

@@ -26,14 +26,13 @@ log.info """\
 
 FOR DEVELOPERS USE
 
-Nextflow location   : ${params.nextflow_location}
-Data Base Dir       : ${params.data_base_dir}
+SessionId           : $workflow.sessionId
 LaunchDir           : $workflow.launchDir
 projectDir          : $workflow.projectDir
 workDir             : $workflow.workDir
-SessionId           : $workflow.sessionId
 RunName             : $workflow.runName
 NextFlow version    : $nextflow.version
+Nextflow location   : ${params.nextflow_location}
 Date                : ${new java.util.Date()}
 Protocols           : ${params.protocols}
 Protocols           : ${params.resource_identifiers}
@@ -42,6 +41,8 @@ Protocols           : ${params.completeness}
  """
 
 process get_log_files {
+
+    label 'data_mover'
 
     input:
     val root_dir
@@ -60,7 +61,7 @@ process get_log_files {
 
 process process_log_file {
 
-    label 'process_low'
+    label 'process_very_low'
     label 'data_mover'
 
 
@@ -84,6 +85,8 @@ process process_log_file {
 }
 
 process analyze_parquet_files {
+
+    label 'process_low'
 
     input:
     val all_parquet_files  // A comma-separated string of file paths
