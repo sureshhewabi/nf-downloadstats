@@ -27,7 +27,6 @@ log.info """\
 FOR DEVELOPERS USE
 
 Nextflow location   : ${params.nextflow_location}
-Data Base Dir       : ${params.data_base_dir}
 LaunchDir           : $workflow.launchDir
 projectDir          : $workflow.projectDir
 workDir             : $workflow.workDir
