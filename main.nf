@@ -61,6 +61,8 @@ process get_log_files {
 process process_log_file {
 
     label 'process_low'
+    label 'data_mover'
+
 
     input:
     val file_path  // Each file object from the channel
