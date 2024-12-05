@@ -18,12 +18,14 @@ class LogParser:
         self.RESOURCE_IDENTIFIERS = resource_list
         self.completeness = {c.lower().strip() for c in completeness_list}
 
-    def parse_gzipped_tsv(self):
+
+    def parse_gzipped_tsv(self, batch_size):
         """
-        Read the gzipped TSV file and parse each line
-        :return:
+        Read the gzipped TSV file, parse each line, and yield data in batches.
+        :param batch_size: Number of rows to include in each batch.
+        :return: Generator that yields batches of parsed data.
         """
-        parsed_data = []
+        batch = []
 
         try:
             with gzip.open(self.file_path, "rt", encoding="utf-8") as log_file:
@@ -34,14 +36,21 @@ class LogParser:
                         if self.is_relevant_row(row):
                             parsed_line = self.parse_row(row)
                             if parsed_line:
-                                parsed_data.append(parsed_line)
+                                batch.append(parsed_line)
+                                # Yield the batch when it reaches the desired size
+                                if len(batch) == batch_size:
+                                    yield batch
+                                    batch = []  # Reset the batch after yielding
                     else:
                         print("WARNING----!!! Number of columns expected was 13 found ", len(row), " in line no ",
                               line_no, " and row is :", row)
+            # Yield any remaining data in the batch
+            if batch:
+                yield batch
         except OSError as e:
             print(f"Skipping corrupted file: {self.file_path} due to {e}")
-            return None
-        return parsed_data
+        except Exception as e:
+            print(f"Got an exception while processing file {self.file_path}: {e}")
 
     def is_relevant_row(self, row):
         """

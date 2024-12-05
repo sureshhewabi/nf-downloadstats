@@ -35,8 +35,9 @@ NextFlow version    : $nextflow.version
 Nextflow location   : ${params.nextflow_location}
 Date                : ${new java.util.Date()}
 Protocols           : ${params.protocols}
-Protocols           : ${params.resource_identifiers}
-Protocols           : ${params.completeness}
+Resource Identifiers: ${params.resource_identifiers}
+Completeness        : ${params.completeness}
+Batch Size          : ${params.log_file_batch_size}
 
  """
 
@@ -81,6 +82,7 @@ process process_log_file {
         -o "\${filename}.parquet" \
         -r '${params.resource_identifiers.join(" ")}' \
         -c '${params.completeness.join(" ")}' \
+        -b ${params.log_file_batch_size} \
         > process_log_file.log 2>&1
     """
 }

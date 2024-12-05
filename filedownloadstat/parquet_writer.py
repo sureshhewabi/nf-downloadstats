@@ -18,36 +18,110 @@ class ParquetWriter:
         pa.field('method', pa.string(), metadata={'description': 'Download method such as FTP/Aspera/Globus'}),
     ])
 
-    def __init__(self, parquet_path: str = None):
-        self.parquet_path = parquet_path
+    COMPRESSION = 'snappy'
 
-    def write(self, data, parquet_output):
+    def __init__(self, parquet_path: str, write_strategy: str = 'all', batch_size: int = 10000):
+        """
+        Initialize ParquetWriter.
+
+        :param parquet_path: Path to the Parquet file/directory.
+        :param write_strategy: Writing strategy ('all' or 'batch').
+        :param batch_size: Batch size for batch-wise writing.
+        """
+        if not parquet_path:
+            raise ValueError("parquet_path is required")
+
+        self.parquet_path = parquet_path
+        self.write_strategy = write_strategy.lower()
+        self.batch_size = batch_size
+        self.parquet_writer = None
+        self.batch_data = []
+
+    # METHOD 1
+    def write_all(self, data):
         """
         Write parquet file with schema
-        :param parquet_output:
         :param data: array of data to write
         :return:
         """
-        if parquet_output is None:
-            raise ValueError("parquet_output is required")
-        if parquet_output is None:
-            parquet_output = self.parquet_path
-
-        COMPRESSION = 'snappy'
-
         try:
             # Convert data to PyArrow Table
             table = pa.Table.from_pylist(data, schema=self.schema)
-            if table is not None and len(table) > 0:
-                # Write to a Parquet dataset with partitioning
+            if len(table) > 0:
+                # Write to Parquet
                 pq.write_to_dataset(
                     table,
-                    root_path=parquet_output,
-                    # partition_cols=['accession'],  # Specify partition columns
-                    compression=COMPRESSION)
-                is_data_written = True
-            else:
-                is_data_written = False
+                    root_path=self.parquet_path,
+                    compression=self.COMPRESSION
+                )
+                return True
+            return False
         except Exception as e:
-            raise ValueError(e.with_traceback())
-        return is_data_written
+            print(f"Error during write_all: {e}")
+            raise
+
+    # METHOD 2
+    def write_batch(self, data):
+        """
+        Write data in batches to a Parquet file.
+
+        :param data: List of dictionaries representing the data.
+        """
+
+        try:
+            # Add new data to the current batch
+            self.batch_data.extend(data)
+            data_written = False
+
+            # If batch size is reached, write the batch
+            while len(self.batch_data) >= self.batch_size:
+                self._write_current_batch()
+                data_written = True
+            return data_written
+
+        except Exception as e:
+            print(f"Error during write_batch: {e}")
+            raise
+
+    def _write_current_batch(self):
+        """
+        Write the current batch to the Parquet file.
+        """
+        try:
+            # Create a RecordBatch from the current batch data
+            batch = pa.RecordBatch.from_pylist(self.batch_data[:self.batch_size], schema=self.schema)
+
+            # Initialize the writer lazily
+            if self.parquet_writer is None:
+                self.parquet_writer = pq.ParquetWriter(self.parquet_path, schema=self.schema,
+                                                       compression=self.COMPRESSION)
+
+            # Write the batch
+            self.parquet_writer.write_batch(batch)
+
+            # Remove written data from the batch
+            self.batch_data = self.batch_data[self.batch_size:]
+
+        except Exception as e:
+            print(f"Error during _write_current_batch: {e}")
+            raise
+
+    def finalize(self):
+        """
+        Finalize the writing process.
+        Writes any remaining data and closes the writer.
+        """
+        data_written = False
+        try:
+            # Write remaining data if any
+            if self.batch_data and self.write_strategy == 'batch':
+                self._write_current_batch()
+                data_written = True
+
+            # Close the writer
+            if self.parquet_writer:
+                self.parquet_writer.close()
+            return data_written
+        except Exception as e:
+            print(f"Error during finalize: {e}")
+            raise
