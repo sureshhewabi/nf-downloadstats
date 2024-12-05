@@ -6,3 +6,4 @@ resource_identifiers:
   - '/pride/data/archive'
 completeness:
   - complete
+log_file_batch_size: 1000

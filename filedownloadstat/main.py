@@ -66,11 +66,18 @@ def get_log_files(root_dir: str, output: str, protocols: str):
     required=True,
     type=str
 )
-def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str):
+@click.option(
+    "-b",
+    "--batch",
+    help="Batch size of the TVS file to read",
+    required=False,
+    type=int
+)
+def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, batch: int = 1000):
     resource_list = resource.split()
     completeness_list = complete.split()
     fileutil = FileUtil()
-    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list)
+    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch)
 
 
 @click.command(

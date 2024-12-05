@@ -42,8 +42,8 @@ class FileUtil:
         print(f"File paths written to {file_paths_list}")
         return file_paths_list
 
-    def process_log_file(self, file_path, parquet_output_file, resource_list: list, completeness_list: list):
-
+    def process_log_file(self, file_path: str, parquet_output_file: str, resource_list: list, completeness_list: list, batch_size: int):
+        data_written = False
         try:
             print(f"Parsing log file started: {file_path}")
 
@@ -53,16 +53,17 @@ class FileUtil:
             print(f"Parsing file and writing output to {parquet_output_file}")
 
             lp = LogParser(file_path, resource_list, completeness_list)
-            data = lp.parse_gzipped_tsv()
+            writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
 
-            if data is not None:
-                # Write to Parquet
-                parquet_writer = ParquetWriter(parquet_output_file)
-                is_data_written = parquet_writer.write(data, parquet_output_file)
-            else:
-                is_data_written = False
+            for batch in lp.parse_gzipped_tsv(batch_size=batch_size):
+                if writer.write_batch(batch):
+                    data_written = True
 
-            if is_data_written:
+            # Finalize and check if any data was written
+            if writer.finalize():
+                data_written = True
+
+            if data_written:
                 print(f"Parquet file written to {parquet_output_file} for {file_path}")
             else:
                 print(f"No data found to write :  {file_path}")
