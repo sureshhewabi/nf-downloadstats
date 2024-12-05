@@ -63,6 +63,7 @@ process process_log_file {
 
     label 'process_very_low'
     label 'data_mover'
+    label 'error_retry'
 
 
     input:
