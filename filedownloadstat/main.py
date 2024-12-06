@@ -2,6 +2,7 @@ import os
 
 import click
 
+from log_file_stat import LogFileStat
 from parquet_reader import ParquetReader
 from stat_parquet import StatParquet
 from file_util import FileUtil
@@ -30,9 +31,6 @@ from file_util import FileUtil
 )
 def get_log_files(root_dir: str, output: str, protocols: str):
     protocol_list = protocols.split()
-    print(f"Root Directory: {root_dir}")
-    print(f"Output File: {output}")
-    print(f"Protocols: {protocol_list}")
     fileutil = FileUtil()
     file_paths_list = fileutil.process_access_methods(root_dir, output, protocol_list)
     return file_paths_list
@@ -80,6 +78,26 @@ def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, 
     fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch)
 
 
+@click.command("run_log_file_stat",
+               short_help="Run Log file Statistics", )
+@click.option(
+    "-f",
+    "--file",
+    help="All the tsv log file paths written to this file",
+    required=True,
+    type=str
+)
+@click.option(
+    "-o",
+    "--output",
+    help="Report on HTML",
+    required=True,
+    type=str
+)
+def run_log_file_stat(file: str, output: str):
+    log_file_stat = LogFileStat()
+    log_file_stat.run_log_file_stat(file, output)
+
 @click.command(
     "read-parquet",
     short_help="Read a single parquet file",
@@ -124,12 +142,13 @@ def cli():
     pass
 
 
-# used features
+# =============== Features Used ===============
 cli.add_command(get_log_files)
+cli.add_command(run_log_file_stat)
 cli.add_command(process_log_file)
 cli.add_command(get_file_counts)
 
-# additional features
+# =============== Additional Features ===============
 cli.add_command(read_parquet_files)
 
 if __name__ == "__main__":
