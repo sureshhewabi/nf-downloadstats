@@ -22,20 +22,20 @@ class FileUtil:
         return [str(file) for file in root_path.rglob("*.tsv.gz")]
 
 
-    def count_lines_in_gz(self, file_path):
-        """
-        Count the number of lines in a gzipped file.
-        :param file_path: Path to the gzipped file.
-        :return: Number of lines.
-        """
-        line_count = 0
-        try:
-            with gzip.open(file_path, "rt", encoding="utf-8") as gz_file:
-                for _ in gz_file:
-                    line_count += 1
-        except Exception as e:
-            print(f"Error counting lines in {file_path}: {e}")
-        return line_count
+    # def count_lines_in_gz(self, file_path):
+    #     """
+    #     Count the number of lines in a gzipped file.
+    #     :param file_path: Path to the gzipped file.
+    #     :return: Number of lines.
+    #     """
+    #     line_count = 0
+    #     try:
+    #         with gzip.open(file_path, "rt", encoding="utf-8") as gz_file:
+    #             for _ in gz_file:
+    #                 line_count += 1
+    #     except Exception as e:
+    #         print(f"Error counting lines in {file_path}: {e}")
+    #     return line_count
 
 
     def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list):
@@ -56,13 +56,12 @@ class FileUtil:
                 file_size = file_path_obj.stat().st_size
 
                 # Count number of lines in the gzipped file
-                line_count = self.count_lines_in_gz(file_path)
+                # line_count = self.count_lines_in_gz(file_path)
 
                 file_info = {
                     "path": file_path,
                     "filename": file_path_obj.name,
                     "size": file_size,
-                    "lines": line_count,
                 }
                 file_metadata.append(file_info)
 
@@ -70,7 +69,7 @@ class FileUtil:
         with open(file_paths_list, "w") as f:
             for metadata in file_metadata:
                 f.write(
-                    f"{metadata['path']}\t{metadata['filename']}\t{metadata['size']}\t{metadata['lines']}\n"
+                    f"{metadata['path']}\t{metadata['filename']}\t{metadata['size']}\n"
                 )
 
         print(f"File metadata written to {file_paths_list}")
