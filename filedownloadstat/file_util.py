@@ -62,6 +62,7 @@ class FileUtil:
                     "path": file_path,
                     "filename": file_path_obj.name,
                     "size": file_size,
+                    "protocol": protocol,
                 }
                 file_metadata.append(file_info)
 
@@ -69,7 +70,7 @@ class FileUtil:
         with open(file_paths_list, "w") as f:
             for metadata in file_metadata:
                 f.write(
-                    f"{metadata['path']}\t{metadata['filename']}\t{metadata['size']}\n"
+                    f"{metadata['path']}\t{metadata['filename']}\t{metadata['size']}\t{metadata['protocol']}\n"
                 )
 
         print(f"File metadata written to {file_paths_list}")
