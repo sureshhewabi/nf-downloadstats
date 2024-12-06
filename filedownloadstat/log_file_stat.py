@@ -38,7 +38,7 @@ class LogFileStat:
         """
         # Generate the visualizations
         LogFileStat.log_file_size_distribution(file)
-        LogFileStat.number_of_lines_vs_file_size(file)
+        # LogFileStat.number_of_lines_vs_file_size(file)
 
         # Combine the HTML files
         with open(output, "w") as f:
