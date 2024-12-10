@@ -21,7 +21,6 @@ class FileUtil:
         root_path = Path(root_dir)
         return [str(file) for file in root_path.rglob("*.tsv.gz")]
 
-
     # def count_lines_in_gz(self, file_path):
     #     """
     #     Count the number of lines in a gzipped file.
@@ -36,7 +35,6 @@ class FileUtil:
     #     except Exception as e:
     #         print(f"Error counting lines in {file_path}: {e}")
     #     return line_count
-
 
     def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list):
         """
@@ -76,7 +74,8 @@ class FileUtil:
         print(f"File metadata written to {file_paths_list}")
         return file_paths_list
 
-    def process_log_file(self, file_path: str, parquet_output_file: str, resource_list: list, completeness_list: list, batch_size: int):
+    def process_log_file(self, file_path: str, parquet_output_file: str, resource_list: list, completeness_list: list,
+                         batch_size: int):
         data_written = False
         try:
             print(f"Parsing log file started: {file_path}")

@@ -1,4 +1,7 @@
 protocols:
+#  - fasp-aspera
+#  - gridftp-globus
+#  - http
   - ftp
 public_private:
   - public

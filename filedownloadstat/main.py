@@ -3,6 +3,7 @@ import os
 import click
 
 from log_file_stat import LogFileStat
+from file_download_stat import FileDownloadStat
 from parquet_reader import ParquetReader
 from stat_parquet import StatParquet
 from file_util import FileUtil
@@ -123,18 +124,39 @@ def read_parquet_files(file: str):
               "--input_dir",
               required=True,
               )
-# @click.option("-g",
-#               "--output_grouped",
-#               required=True,
-#               )
+@click.option("-g",
+              "--output_grouped",
+              required=True,
+              )
 @click.option("-s",
               "--output_summed",
               required=True,
               )
-def get_file_counts(input_dir, output_summed):
+def get_file_counts(input_dir, output_summed, output_grouped):
     stat_parquet = StatParquet()
-    result = stat_parquet.get_file_counts(input_dir, output_summed)
+    result = stat_parquet.get_file_counts(input_dir, output_grouped, output_summed)
     print(result)
+
+
+@click.command("run_file_download_stat",
+               short_help="Run File Down Statistics", )
+@click.option(
+    "-f",
+    "--file",
+    help="JSON file containing file download stats",
+    required=True,
+    type=str
+)
+@click.option(
+    "-o",
+    "--output",
+    help="Report on HTML",
+    required=True,
+    type=str
+)
+def run_file_download_stat(file: str, output: str):
+    file_download_stat = FileDownloadStat()
+    file_download_stat.run_file_download_stat(file, output)
 
 
 @click.group()
@@ -143,12 +165,15 @@ def cli():
 
 
 # =============== Features Used ===============
+
 cli.add_command(get_log_files)
 cli.add_command(run_log_file_stat)
 cli.add_command(process_log_file)
 cli.add_command(get_file_counts)
+cli.add_command(run_file_download_stat)
 
 # =============== Additional Features ===============
+
 cli.add_command(read_parquet_files)
 
 if __name__ == "__main__":

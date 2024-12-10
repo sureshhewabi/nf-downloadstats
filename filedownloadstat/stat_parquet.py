@@ -8,7 +8,7 @@ class StatParquet:
     def __init__(self):
         pass
 
-    def get_file_counts(self, input_files, output_summed):
+    def get_file_counts(self, input_files, output_grouped, output_summed):
 
         all_files = self.get_all_parquet_files(input_files)
         # Load all parquet files into a Dask DataFrame
@@ -23,8 +23,8 @@ class StatParquet:
         grouped = grouped.compute()
 
         # Save to JSON (grouped counts)
-        # grouped.to_json(output_grouped, orient='records', lines=False)
-        # print(f"Grouped counts saved to {output_grouped}")
+        grouped.to_json(output_grouped, orient='records', lines=False)
+        print(f"Grouped counts saved to {output_grouped}")
 
         # Group by accession and sum file counts
         summed = grouped.groupby("accession", as_index=False)["count"].sum()
