@@ -8,10 +8,10 @@ class StatParquet:
     def __init__(self):
         pass
 
-    def get_file_counts(self, input_files, output_grouped, output_summed):
+    def get_file_counts(self, input_files, output_grouped, output_summed, all_data):
 
+        # Load all Parquet files into a Dask DataFrame
         all_files = self.get_all_parquet_files(input_files)
-        # Load all parquet files into a Dask DataFrame
         print(f"Loading {len(all_files)} Parquet files...")
         ddf = dd.read_parquet(all_files)
 
@@ -32,6 +32,13 @@ class StatParquet:
         # Save to JSON (summed counts)
         summed.to_json(output_summed, orient='records', lines=False)
         print(f"Summed counts saved to {output_summed}")
+
+        # Convert to a pandas DataFrame
+        df = ddf.compute()
+
+        # Save to a single JSON file
+        df.to_json(all_data, orient='records', lines=False)
+        print(f"All data saved to {all_data}")
 
     def get_all_parquet_files(self, file_list_path):
         """Read file paths from a text file and validate them as Parquet files."""

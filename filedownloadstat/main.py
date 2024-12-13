@@ -132,9 +132,13 @@ def read_parquet_files(file: str):
               "--output_summed",
               required=True,
               )
-def get_file_counts(input_dir, output_summed, output_grouped):
+@click.option("-a",
+              "--all_data",
+              required=True,
+              )
+def get_file_counts(input_dir, output_summed, output_grouped, all_data):
     stat_parquet = StatParquet()
-    result = stat_parquet.get_file_counts(input_dir, output_grouped, output_summed)
+    result = stat_parquet.get_file_counts(input_dir, output_grouped, output_summed, all_data)
     print(result)
 
 
@@ -143,7 +147,7 @@ def get_file_counts(input_dir, output_summed, output_grouped):
 @click.option(
     "-f",
     "--file",
-    help="JSON file containing file download stats",
+    help="Parquet file containing file download stats",
     required=True,
     type=str
 )
