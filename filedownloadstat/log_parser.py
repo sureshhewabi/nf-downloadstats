@@ -83,8 +83,8 @@ class LogParser:
                 "date": date,  # Date
                 "year": year,
                 "month": month,
-                "accession": row[3].split('/')[-2],  # Extract the PXD Accession from the path
-                "filename": row[3].split('/')[-1],  # Extract the Filename from the path
+                "accession": row[3].split('/')[-2],  # Project accession of the resource(eg: PXD accession in PRIDE)
+                "filename": row[3].split('/')[-1],  # Files that are associate to a project(project acceesion)
                 "completed": row[6].lower().strip(),  # Completion Status (e.g., Complete or Incomplete)
                 "country": row[7],  # Country
                 "method": row[11],  # Method (e.g., ftp, aspera)

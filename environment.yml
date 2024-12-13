@@ -16,3 +16,4 @@ dependencies:
       - pyarrow>=10.0.1
       - dask>=2023.1.0
       - plotly
+      - mkdocs
