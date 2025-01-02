@@ -39,8 +39,8 @@ class FileDownloadStat:
 
         ############ 3. Regional Statistics ############
         # Group data by country to get the count of downloads
-        choropleth_data = df.groupby("country").size().reset_index(name="count")
-        # print(choropleth_data)
+        choropleth_data = df.groupby(['country', 'year']).size().reset_index(name='count')
+        choropleth_data = choropleth_data.sort_values(by='year')
         RegionalStat.download_by_country(choropleth_data)
 
         # Combine the HTML files
