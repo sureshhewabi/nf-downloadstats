@@ -13,17 +13,27 @@ class FileDownloadStat:
         """
 
         # Load the Parquet file
-        df = pd.read_json(file)
-        df['date'] = pd.to_datetime(df['date'], unit='ms')
+        data = pd.read_json(file)
+        # Convert to DataFrame
+        df = pd.DataFrame(data)
 
-        ############ 1. Project level Statistics ############
-        # Group data by accession and calculate the total count for each accession
-        accession_data = df.groupby("accession").size().reset_index(name="count")
+        # Add a `month_year` column
+        df['month_year'] = df['year'].astype(str) + '-' + df['month'].astype(str).str.zfill(2)
 
-        # Sort data by count for better visualization (optional)
-        accession_data = accession_data.sort_values(by="count", ascending=False)
+        # Ensure the x-axis displays all `month_year` values
+        unique_month_years = sorted(df['month_year'].unique())
 
-        ProjectStat.downloads_per_accession(accession_data)
+        # Total downloads per month-year
+        total_downloads = df.groupby('month_year').size().reset_index(name='count')
+        total_downloads['method'] = 'Total'  # Label for the total count
+
+        # Downloads per month-year by method
+        downloads_by_method = df.groupby(['month_year', 'method']).size().reset_index(name='count')
+
+        # Combine total downloads and method-specific downloads
+        combined_data = pd.concat([total_downloads, downloads_by_method])
+
+        ProjectStat.combined_line_chart(combined_data, unique_month_years)
 
         ############ 2. Trends Statistics ############
 
@@ -49,8 +59,8 @@ class FileDownloadStat:
 
             f.write("<h2> 1. Project level Statistics </h2>")
             # Embed the content of the generated HTML plots
-            with open("downloads_per_accession.html", "r") as downloads_per_accession:
-                f.write(downloads_per_accession.read())
+            with open("combined_line_chart.html", "r") as combined_line_chart:
+                f.write(combined_line_chart.read())
 
             f.write("<h2> 2. Trends Statistics </h2>")
             with open("downloads_by_month.html", "r") as downloads_by_month:
