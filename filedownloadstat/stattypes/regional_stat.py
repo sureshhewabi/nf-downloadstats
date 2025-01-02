@@ -25,7 +25,14 @@ class RegionalStat:
 
         # Update layout to show the latest year by default
         latest_year = choropleth_data['year'].max()
-        fig.layout.updatemenus[0].buttons[-1].args[1]['frame']['redraw'] = True  # Force redraw
+        if fig.layout.updatemenus and len(fig.layout.updatemenus) > 0:
+            if fig.layout.updatemenus[0].buttons and len(fig.layout.updatemenus[0].buttons) > 0:
+                fig.layout.updatemenus[0].buttons[-1].args[1]['frame']['redraw'] = True  # Force redraw
+            else:
+                print("No buttons in updatemenus.")
+        else:
+            print("No updatemenus present.")
+
         fig.update_layout(
             geo=dict(
                 showframe=False,
