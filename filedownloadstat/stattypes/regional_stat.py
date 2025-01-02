@@ -4,15 +4,48 @@ import plotly.express as px
 class RegionalStat:
 
     @staticmethod
-    def download_by_country(data):
+    def download_by_country(choropleth_data):
         """
          Visualize downloads geographically
         """
-        fig = px.choropleth(data,
-                            locations='country',
-                            locationmode='country names',
-                            color='count',
-                            title='Downloads by Country',
-                            labels={"count": "Downloads"}
+        # Plot Bubble Map with animation_frame
+        fig = px.scatter_geo(
+            choropleth_data,
+            locations='country',
+            locationmode='country names',
+            size='count',  # Size of the bubbles
+            color='count',  # Color scale based on count
+            hover_name='country',  # Country name on hover
+            animation_frame='year',  # Animation by year
+            title='Downloads by Country Over Time',
+            labels={'count': 'Downloads', 'country': 'Country'},
+            size_max=50,
+            color_discrete_sequence=px.colors.qualitative.Set3
+        )
+
+        # Update layout to show the latest year by default
+        latest_year = choropleth_data['year'].max()
+        fig.layout.updatemenus[0].buttons[-1].args[1]['frame']['redraw'] = True  # Force redraw
+        fig.update_layout(
+            geo=dict(
+                showframe=False,
+                showcoastlines=True,
+                projection_type='natural earth'
+            ),
+            sliders=[
+                dict(
+                    steps=[
+                        dict(
+                            args=[[year], {"frame": {"duration": 500, "redraw": True}}],
+                            label=str(year),
+                            method="animate"
+                        )
+                        for year in sorted(choropleth_data['year'].unique())
+                    ],
+                    active=sorted(choropleth_data['year'].unique()).index(latest_year),
+                    currentvalue=dict(font=dict(size=14), prefix="Year: ", visible=True),
+                    pad=dict(t=50),
+                )
+            ]
         )
         fig.write_html("downloads_by_country.html")

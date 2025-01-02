@@ -7,16 +7,29 @@ class ProjectStat:
     """
 
     @staticmethod
-    def downloads_per_accession(accession_data):
+    def combined_line_chart(combined_data, unique_month_years):
         """
-        Highlight popular projects based on their accession
+        Highlight number of monthly downloads
         """
-        # Create the bar chart
-        fig = px.bar(
-            accession_data,
-            x="accession",  # X-axis: Project accession
-            y="count",  # Y-axis: Count of downloads
-            title="Downloads Per Project Accession",  # Chart title
-            labels={"accession": "Project Accession", "count": "Downloads"}  # Axis labels
+        # Plot: Combined line chart
+        fig = px.line(
+            combined_data,
+            x='month_year',
+            y='count',
+            color='method',
+            title='Monthly Downloads: Total and by Method',
+            labels={'month_year': 'Month-Year', 'count': 'Downloads', 'method': 'Download Method'}
         )
-        fig.write_html('downloads_per_accession.html')
+        # Update layout for fixed x-axis ticks
+        fig.update_layout(
+            xaxis=dict(
+                tickmode='array',
+                tickvals=unique_month_years,
+                ticktext=unique_month_years
+            ),
+            xaxis_tickangle=-45
+        )
+        # Update layout for smoother animation
+        # fig.update_layout(transition={'duration': 500}, xaxis_tickangle=-45)
+
+        fig.write_html('combined_line_chart.html')
