@@ -11,6 +11,7 @@ class ParquetWriter:
         pa.field('date', pa.date64(), metadata={'description': 'Date that the dataset was downloaded'}),
         pa.field('year', pa.int16(), metadata={'description': 'Year that the dataset was downloaded'}),
         pa.field('month', pa.int8(), metadata={'description': 'Month that the dataset was downloaded'}),
+        pa.field('user', pa.string(), metadata={'description': 'Hash representing the user'}),
         pa.field('accession', pa.string(), metadata={'description': 'PRIDE accession started with PXD'}),
         pa.field('filename', pa.string(), metadata={'description': 'Filename of the file downloaded'}),
         pa.field('completed', pa.string(), metadata={'description': 'Check if the file download was completed'}),
