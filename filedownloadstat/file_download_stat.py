@@ -65,11 +65,11 @@ class FileDownloadStat:
         UserStat.users_by_country(country_user_data)
 
 
-        # # Group by user and country, and calculate counts
-        # active_users = df.groupby(["user", "country"]).size().reset_index(name="count")
-        # # Create a combined x-axis label
-        # active_users["user_country"] = active_users["user"] + " (" + active_users["country"] + ")"
-        # UserStat.top_ten_users(active_users)
+        # Group by user and country, and calculate counts
+        active_users = df.groupby(["user", "country"]).size().reset_index(name="count")
+        # Create a combined x-axis label
+        active_users["user_country"] = active_users["user"] + " (" + active_users["country"] + ")"
+        UserStat.top_ten_users(active_users)
 
         # Combine the HTML files
         with open(output, "w") as f:
