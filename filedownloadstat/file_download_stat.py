@@ -62,14 +62,10 @@ class FileDownloadStat:
 
         # Calculate unique users per country
         country_user_data = df.groupby(['country', 'year'], as_index=False)['user'].nunique()
+        country_user_data = country_user_data.sort_values(by='year')
         UserStat.users_by_country(country_user_data)
 
 
-        # Group by user and country, and calculate counts
-        active_users = df.groupby(["user", "country"]).size().reset_index(name="count")
-        # Create a combined x-axis label
-        active_users["user_country"] = active_users["user"] + " (" + active_users["country"] + ")"
-        UserStat.top_ten_users(active_users)
 
         # Combine the HTML files
         with open(output, "w") as f:
@@ -95,8 +91,7 @@ class FileDownloadStat:
                 f.write(unique_users_over_time.read())
             with open("users_by_country.html", "r") as users_by_country:
                 f.write(users_by_country.read())
-            with open("top_ten_users.html", "r") as top_ten_users:
-                f.write(top_ten_users.read())
+
 
 
 

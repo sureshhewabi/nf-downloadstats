@@ -36,18 +36,3 @@ class UserStat:
         )
         fig.write_html("users_by_country.html")
 
-
-    @staticmethod
-    def top_ten_users(active_users):
-        """
-        If you want to visualize user-level details, such as the most active users or their activities over time
-        """
-        # Plot the top active users
-        fig = px.bar(
-            active_users,
-            x="user_country",  # Combined user and country as x-axis
-            y="count",  # Count as y-axis
-            title="Custom User Behavior Analysis",
-            labels={"count": "Downloads", "user_country": "User (Country)"}
-        )
-        fig.write_html("top_ten_users.html")
