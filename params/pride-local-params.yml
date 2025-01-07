@@ -10,3 +10,4 @@ resource_identifiers:
 completeness:
   - complete
 log_file_batch_size: 1000
+report_template: pride_report.html

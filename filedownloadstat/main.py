@@ -158,9 +158,16 @@ def get_file_counts(input_dir, output_summed, output_grouped, all_data):
     required=True,
     type=str
 )
-def run_file_download_stat(file: str, output: str):
+@click.option(
+    "-r",
+    "--report_template",
+    help="Report Template in HTML. This means each resources may have their own HTML report",
+    required=True,
+    type=str
+)
+def run_file_download_stat(file: str, output: str, report_template: str):
     file_download_stat = FileDownloadStat()
-    file_download_stat.run_file_download_stat(file, output)
+    file_download_stat.run_file_download_stat(file, output, report_template)
 
 
 @click.group()
