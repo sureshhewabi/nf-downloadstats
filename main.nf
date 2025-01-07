@@ -37,6 +37,7 @@ Date                : ${new java.util.Date()}
 Protocols           : ${params.protocols}
 Resource Identifiers: ${params.resource_identifiers}
 Completeness        : ${params.completeness}
+Report Template     : ${params.report_template}
 Batch Size          : ${params.log_file_batch_size}
 
  """
@@ -125,9 +126,6 @@ process analyze_parquet_files {
         --output_grouped file_download_counts.json \
         --output_summed summed_accession_counts.json \
         --all_data all_data.json
-
-    # Debug: Verify output files
-    ls -lh
     """
 }
 
@@ -144,7 +142,8 @@ process run_file_download_stat {
     """
     python3 ${workflow.projectDir}/filedownloadstat/main.py run_file_download_stat \
         --file ${all_data} \
-        --output "file_download_stat.html"
+        --output "file_download_stat.html" \
+        --report_template ${params.report_template}
     """
 }
 

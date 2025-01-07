@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from stattypes.project_stat import ProjectStat
 from stattypes.regional_stat import RegionalStat
@@ -89,7 +90,7 @@ class FileDownloadStat:
         UserStat.users_by_country(country_user_data)
 
     @staticmethod
-    def run_file_download_stat(file, output):
+    def run_file_download_stat(file, output, report_template):
         """
         Run the log file statistics generation and save the visualizations in an HTML output file.
         """
@@ -104,11 +105,7 @@ class FileDownloadStat:
         FileDownloadStat.regional_stats(df)
         FileDownloadStat.user_stats(df)
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        template_path = os.path.join(base_dir, "..", "template", "pride_report.html")
-
-        # Normalize path for cross-platform compatibility
-        template_path = os.path.normpath(template_path)
+        template_path = Path(__file__).resolve().parent.parent / "template" / report_template
 
         print(f"Looking for template at: {template_path}")
         Report.generate_report(template_path, output)
