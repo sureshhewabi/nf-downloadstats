@@ -27,12 +27,14 @@ class UserStat:
             country_user_data,
             locations='country',
             locationmode='country names',
-            size='user',  # Bubble size
+            size='user',
+            color='user',
             hover_name='country',
             animation_frame='year',
             title='Unique Users by Country Over Time',
             labels={"user": "Unique Users", "country": "Country"},
-            size_max=50
+            size_max=50,
+            color_discrete_sequence=px.colors.qualitative.Set3
         )
         fig.write_html("users_by_country.html")
 
