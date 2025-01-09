@@ -37,6 +37,7 @@ Date                : ${new java.util.Date()}
 Protocols           : ${params.protocols}
 Resource Identifiers: ${params.resource_identifiers}
 Completeness        : ${params.completeness}
+Public/Private      : ${params.public_private}
 Report Template     : ${params.report_template}
 Batch Size          : ${params.log_file_batch_size}
 
@@ -57,7 +58,8 @@ process get_log_files {
     python3 ${workflow.projectDir}/filedownloadstat/main.py get_log_files \
         --root_dir $root_dir \
         --output "file_list.txt" \
-        --protocols '${params.protocols.join(" ")}'
+        --protocols "${params.protocols.join(',')}" \
+        --public "${params.public_private.join(',')}"
     """
 }
 
@@ -97,8 +99,8 @@ process process_log_file {
     python3 ${workflow.projectDir}/filedownloadstat/main.py process_log_file \
         -f ${file_path} \
         -o "\${filename}.parquet" \
-        -r '${params.resource_identifiers.join(" ")}' \
-        -c '${params.completeness.join(" ")}' \
+        -r "${params.resource_identifiers.join(",")}" \
+        -c "${params.completeness.join(",")}" \
         -b ${params.log_file_batch_size} \
         > process_log_file.log 2>&1
     """
