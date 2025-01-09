@@ -68,25 +68,71 @@ class ProjectStat:
         """
         This will create a histogram where each bar represents how many projects fall into different download count ranges
         """
-        fig = px.histogram(
+        fig = px.line(
             download_counts,
             x="download_count",
-            nbins=100,  # Set the number of bins
+            y="num_projects",
             title="Distribution of Projects by Download Count",
-            labels={"download_count": "Number of Downloads", "count": "Number of Projects"},
+            labels={"download_count": "Number of Downloads", "num_projects": "Number of Projects"},
+            markers=True  # Add markers to highlight points
         )
         fig.write_html('project_downloads_histogram_1.html')
 
     @staticmethod
-    def project_downloads_histogram_2(download_counts):
+    def top_downloaded_projects(df):
         """
-        This will create a histogram where each bar represents how many projects fall into different download count ranges
+        This will create a horizontal bar chart with Top 10 Most Downloaded Projects
         """
-        fig = px.histogram(
-            download_counts,
+        # fig = px.bar(
+        #     top_10_projects,
+        #     x="download_count",
+        #     y="accession_url",  # Use the clickable version
+        #     orientation="h",  # Horizontal bar chart
+        #     title="Top " + str(number_of_projects) + " Most Downloaded Projects",
+        #     labels={"download_count": "Number of Downloads", "accession_url": "Project Accession"},
+        #     text="download_count",  # Display counts on bars
+        # )
+        df["accession_url"] = df["accession"].apply(
+            lambda x: f'<a href="https://example.com/{x}" target="_blank">{x}</a>')
+
+        top_n_options = [5, 10, 15]
+
+        # Create initial figure (default to Top 10)
+        initial_top_n = 10
+        filtered_df = df.nlargest(initial_top_n, "download_count")
+
+        fig = px.bar(
+            filtered_df,
             x="download_count",
-            nbins=100,  # Set the number of bins
-            title="Distribution of Projects by Download Count",
-            labels={"download_count": "Number of Downloads", "count": "Number of Projects"},
+            y="accession_url",  # Use the clickable version
+            orientation="h",
+            title="Top Downloaded Projects",
+            labels={"download_count": "Number of Downloads", "accession_url": "Project Accession"},
+            text="download_count"
         )
-        fig.write_html('project_downloads_histogram_2.html')
+
+        # Add dropdown menu for selecting Top N projects
+        dropdown_buttons = [
+            {
+                "label": f"Top {n}",
+                "method": "update",
+                "args": [
+                    {"x": [df.nlargest(n, "download_count")["download_count"]],
+                     "y": [df.nlargest(n, "download_count")["accession_url"]],
+                     "text": [df.nlargest(n, "download_count")["download_count"]]
+                     },
+                    {"title": f"Top {n} Downloaded Projects"}
+                ]
+            }
+            for n in top_n_options
+        ]
+
+        fig.update_layout(
+            updatemenus=[{
+                "buttons": dropdown_buttons,
+                "direction": "down",
+                "showactive": True,
+            }]
+        )
+
+        fig.write_html('top_downloaded_projects.html')
