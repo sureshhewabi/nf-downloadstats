@@ -36,7 +36,7 @@ class FileUtil:
     #         print(f"Error counting lines in {file_path}: {e}")
     #     return line_count
 
-    def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list):
+    def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list, public_list: list):
         """
         Process logs and generate Parquet files for each file in the specified access method directories.
         """
@@ -44,25 +44,26 @@ class FileUtil:
         file_metadata = []
 
         for protocol in protocols:
-            method_directory = Path(root_directory) / protocol / "public"
-            files = self.get_file_paths(str(method_directory))
+            for public_private in public_list:
+                method_directory = Path(root_directory) / protocol.strip() / public_private.strip()
+                files = self.get_file_paths(str(method_directory))
 
-            for file_path in files:
-                file_path_obj = Path(file_path)
+                for file_path in files:
+                    file_path_obj = Path(file_path)
 
-                # Retrieve file size
-                file_size = file_path_obj.stat().st_size
+                    # Retrieve file size
+                    file_size = file_path_obj.stat().st_size
 
-                # Count number of lines in the gzipped file
-                # line_count = self.count_lines_in_gz(file_path)
+                    # Count number of lines in the gzipped file
+                    # line_count = self.count_lines_in_gz(file_path)
 
-                file_info = {
-                    "path": file_path,
-                    "filename": file_path_obj.name,
-                    "size": file_size,
-                    "protocol": protocol,
-                }
-                file_metadata.append(file_info)
+                    file_info = {
+                        "path": file_path,
+                        "filename": file_path_obj.name,
+                        "size": file_size,
+                        "protocol": protocol,
+                    }
+                    file_metadata.append(file_info)
 
             # Write metadata to the output file
         with open(file_paths_list, "w") as f:

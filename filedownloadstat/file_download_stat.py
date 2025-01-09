@@ -51,16 +51,35 @@ class FileDownloadStat:
         ProjectStat.cumulative_download(monthly_downloads)
 
         # --------------- 4.1 download count histogram ---------------
-        # Count number of downloads per project (group by "accession")
+
+        # Group by accession and count downloads
         download_counts = df.groupby("accession").size().reset_index(name="download_count")
+
+        # Filter download counts (only <= 10,000)
         filtered_download_counts = download_counts[download_counts["download_count"] <= 10000]
-        ProjectStat.project_downloads_histogram_1(filtered_download_counts)
-        # --------------- 4.2 download count histogram ---------------
-        # Count number of downloads per project (group by "accession")
+
+        # Aggregate to get the number of projects for each download count
+        download_distribution = filtered_download_counts.groupby("download_count").size().reset_index(
+            name="num_projects")
+
+        # Sort data to ensure proper line chart visualization
+        download_distribution = download_distribution.sort_values("download_count")
+        ProjectStat.project_downloads_histogram_1(download_distribution)
+
+        # # --------------- 4.2 download count histogram ---------------
+
+        # num_projects_top_downloaded = 10
+        # # Group by accession and count downloads
         download_counts = df.groupby("accession").size().reset_index(name="download_count")
-        filtered_download_counts = download_counts[download_counts["download_count"] <= 20000]
-        filtered_download_counts = filtered_download_counts[download_counts["download_count"] > 10000]
-        ProjectStat.project_downloads_histogram_2(filtered_download_counts)
+        #
+        # # Get the top most downloaded projects
+        # top_projects = download_counts.nlargest(num_projects_top_downloaded, "download_count")
+        # # Append URL to each accession
+        # base_url = "https://www.ebi.ac.uk/pride/archive/projects/"
+        # top_projects["accession_url"] = top_projects["accession"].apply(
+        #     lambda x: f"<a href='{base_url}{x}' target='_blank'>{x}</a>")
+
+        ProjectStat.top_downloaded_projects(download_counts)
 
     @staticmethod
     def trends_stat(df: pd.DataFrame):
