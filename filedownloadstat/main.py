@@ -30,10 +30,18 @@ from file_util import FileUtil
     required=True,
     type=str
 )
-def get_log_files(root_dir: str, output: str, protocols: str):
-    protocol_list = protocols.split()
+@click.option(
+    "-v",
+    "--public",
+    help="Public or/and private folder",
+    required=True,
+    type=str
+)
+def get_log_files(root_dir: str, output: str, protocols: str, public: str):
+    protocol_list = protocols.split(",")
+    public_list = public.split(",")
     fileutil = FileUtil()
-    file_paths_list = fileutil.process_access_methods(root_dir, output, protocol_list)
+    file_paths_list = fileutil.process_access_methods(root_dir, output, protocol_list, public_list)
     return file_paths_list
 
 
@@ -73,8 +81,8 @@ def get_log_files(root_dir: str, output: str, protocols: str):
     type=int
 )
 def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, batch: int = 1000):
-    resource_list = resource.split()
-    completeness_list = complete.split()
+    resource_list = resource.split(",")
+    completeness_list = complete.split(",")
     fileutil = FileUtil()
     fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch)
 
