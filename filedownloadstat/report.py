@@ -1,3 +1,6 @@
+from pathlib import Path
+
+
 class Report:
 
     # Function to read HTML content from a file
@@ -55,12 +58,13 @@ class Report:
         print(f"Report generated successfully: {output}")
 
     @staticmethod
-    def copy_report(output, new_output):
+    def copy_report(output, report_copy_filepath):
         """
         Open the original file to read and the new file to write
         """
-        with open(output, "r") as original_file, open(new_output, "w") as new_file:
+        file_copy = Path(report_copy_filepath) / "file_download_stat_local.html"
+        with open(output, "r") as original_file, open(file_copy, "w") as new_file:
             for line in original_file:
                 new_file.write(line)
 
-        print(f"File has been copied to {new_output}")
+        print(f"File has been copied to {file_copy}")

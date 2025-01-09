@@ -40,6 +40,8 @@ Completeness        : ${params.completeness}
 Public/Private      : ${params.public_private}
 Report Template     : ${params.report_template}
 Batch Size          : ${params.log_file_batch_size}
+Resource Base URL   : ${params.resource_base_url}
+Report copy location: ${params.report_copy_filepath}
 
  """
 
@@ -145,7 +147,9 @@ process run_file_download_stat {
     python3 ${workflow.projectDir}/filedownloadstat/main.py run_file_download_stat \
         --file ${all_data} \
         --output "file_download_stat.html" \
-        --report_template ${params.report_template}
+        --report_template ${params.report_template} \
+        --baseurl ${params.resource_base_url} \
+        --report_copy_filepath ${params.report_copy_filepath}
     """
 }
 
