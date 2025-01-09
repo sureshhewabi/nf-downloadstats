@@ -23,7 +23,7 @@ class Report:
                 Report.read_html_file("combined_line_chart.html") +
                 Report.read_html_file("cumulative_download.html") +
                 Report.read_html_file("project_downloads_histogram_1.html") +
-                Report.read_html_file("project_downloads_histogram_2.html")
+                Report.read_html_file("top_downloaded_projects.html")
         )
 
         trends_content = (
@@ -53,3 +53,14 @@ class Report:
             output_file.write(final_report)
 
         print(f"Report generated successfully: {output}")
+
+    @staticmethod
+    def copy_report(output, new_output):
+        """
+        Open the original file to read and the new file to write
+        """
+        with open(output, "r") as original_file, open(new_output, "w") as new_file:
+            for line in original_file:
+                new_file.write(line)
+
+        print(f"File has been copied to {new_output}")
