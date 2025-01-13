@@ -1,3 +1,6 @@
+
+############# Log File Parsing #############
+
 protocols:
   - fasp-aspera
   - gridftp-globus
@@ -9,5 +12,15 @@ resource_identifiers:
   - '/pride/data/archive'
 completeness:
   - complete
-log_file_batch_size: 1000
+
+############# Statistics Reports #############
+
 report_template: "pride_report.html"
+skipped_years:
+  - 2025
+base_url: 'https://www.ebi.ac.uk/pride/archive/projects/'
+report_copy_filepath:
+
+############# Push to a Database(e.g MongoDB) #############
+
+log_file_batch_size: 1000
