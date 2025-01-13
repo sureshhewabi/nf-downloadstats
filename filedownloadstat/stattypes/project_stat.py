@@ -79,21 +79,13 @@ class ProjectStat:
         fig.write_html('project_downloads_histogram_1.html')
 
     @staticmethod
-    def top_downloaded_projects(df):
+    def top_downloaded_projects(df, baseurl: str):
         """
         This will create a horizontal bar chart with Top 10 Most Downloaded Projects
         """
-        # fig = px.bar(
-        #     top_10_projects,
-        #     x="download_count",
-        #     y="accession_url",  # Use the clickable version
-        #     orientation="h",  # Horizontal bar chart
-        #     title="Top " + str(number_of_projects) + " Most Downloaded Projects",
-        #     labels={"download_count": "Number of Downloads", "accession_url": "Project Accession"},
-        #     text="download_count",  # Display counts on bars
-        # )
+
         df["accession_url"] = df["accession"].apply(
-            lambda x: f'<a href="https://example.com/{x}" target="_blank">{x}</a>')
+            lambda x: f'<a href="{baseurl}{x}" target="_blank">{x}</a>')
 
         top_n_options = [5, 10, 15]
 

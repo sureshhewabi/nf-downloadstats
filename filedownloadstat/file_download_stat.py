@@ -12,7 +12,7 @@ import pandas as pd
 class FileDownloadStat:
 
     @staticmethod
-    def project_stat(df: pd.DataFrame):
+    def project_stat(df: pd.DataFrame, baseurl: str):
         # --------------- 1. yearly_downloads ---------------
         # Group data by year and method, count occurrences
         yearly_downloads = df.groupby(["year", "method"]).size().reset_index(name="count")
@@ -68,18 +68,9 @@ class FileDownloadStat:
 
         # # --------------- 4.2 download count histogram ---------------
 
-        # num_projects_top_downloaded = 10
         # # Group by accession and count downloads
         download_counts = df.groupby("accession").size().reset_index(name="download_count")
-        #
-        # # Get the top most downloaded projects
-        # top_projects = download_counts.nlargest(num_projects_top_downloaded, "download_count")
-        # # Append URL to each accession
-        # base_url = "https://www.ebi.ac.uk/pride/archive/projects/"
-        # top_projects["accession_url"] = top_projects["accession"].apply(
-        #     lambda x: f"<a href='{base_url}{x}' target='_blank'>{x}</a>")
-
-        ProjectStat.top_downloaded_projects(download_counts)
+        ProjectStat.top_downloaded_projects(download_counts, baseurl)
 
     @staticmethod
     def trends_stat(df: pd.DataFrame):
@@ -109,17 +100,18 @@ class FileDownloadStat:
         UserStat.users_by_country(country_user_data)
 
     @staticmethod
-    def run_file_download_stat(file, output, report_template):
+    def run_file_download_stat(file, output, report_template, baseurl: str, report_copy_filepath, skipped_years_list: list):
         """
         Run the log file statistics generation and save the visualizations in an HTML output file.
         """
 
-        # Load the Parquet file
         data = pd.read_json(file)
-        # Convert to DataFrame
         df = pd.DataFrame(data)
 
-        FileDownloadStat.project_stat(df)
+        # Filter out rows where 'year' is in skipped_years_list
+        df = df[~df["year"].isin(skipped_years_list)]
+
+        FileDownloadStat.project_stat(df, baseurl)
         FileDownloadStat.trends_stat(df)
         FileDownloadStat.regional_stats(df)
         FileDownloadStat.user_stats(df)
@@ -129,6 +121,7 @@ class FileDownloadStat:
         print(f"Looking for template at: {template_path}")
         Report.generate_report(template_path, output)
 
-
-
-
+        if report_copy_filepath and Path(report_copy_filepath).is_dir():
+            Report.copy_report(output, report_copy_filepath)
+        else:
+            print("Warning! report_copy_filepath is not specified in config or path does not exists!")
