@@ -100,15 +100,16 @@ class FileDownloadStat:
         UserStat.users_by_country(country_user_data)
 
     @staticmethod
-    def run_file_download_stat(file, output, report_template, baseurl: str, report_copy_filepath):
+    def run_file_download_stat(file, output, report_template, baseurl: str, report_copy_filepath, skipped_years_list: list):
         """
         Run the log file statistics generation and save the visualizations in an HTML output file.
         """
 
-        # Load the Parquet file
         data = pd.read_json(file)
-        # Convert to DataFrame
         df = pd.DataFrame(data)
+
+        # Filter out rows where 'year' is in skipped_years_list
+        df = df[~df["year"].isin(skipped_years_list)]
 
         FileDownloadStat.project_stat(df, baseurl)
         FileDownloadStat.trends_stat(df)

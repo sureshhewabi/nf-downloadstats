@@ -42,6 +42,7 @@ Report Template     : ${params.report_template}
 Batch Size          : ${params.log_file_batch_size}
 Resource Base URL   : ${params.resource_base_url}
 Report copy location: ${params.report_copy_filepath}
+Skipped Years       : ${params.skipped_years}
 
  """
 
@@ -149,7 +150,8 @@ process run_file_download_stat {
         --output "file_download_stat.html" \
         --report_template ${params.report_template} \
         --baseurl ${params.resource_base_url} \
-        --report_copy_filepath ${params.report_copy_filepath}
+        --report_copy_filepath ${params.report_copy_filepath} \
+        --skipped_years "${params.skipped_years.join(',')}"
     """
 }
 

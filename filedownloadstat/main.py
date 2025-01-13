@@ -187,9 +187,21 @@ def get_file_counts(input_dir, output_summed, output_grouped, all_data):
     required=True,
     type=str
 )
-def run_file_download_stat(file: str, output: str, report_template: str, baseurl: str, report_copy_filepath):
+@click.option(
+    "-y",
+    "--skipped_years",
+    help="You can skip years specified for the statistics calculations",
+    required=False,
+    type=str
+)
+def run_file_download_stat(file: str, output: str, report_template: str, baseurl: str, report_copy_filepath,
+                           skipped_years: str):
+    # Convert the comma-separated string to a list of integers
+    skipped_years_list = list(map(int, skipped_years.split(","))) if skipped_years else []
+
     file_download_stat = FileDownloadStat()
-    file_download_stat.run_file_download_stat(file, output, report_template, baseurl, report_copy_filepath)
+    file_download_stat.run_file_download_stat(file, output, report_template, baseurl, report_copy_filepath,
+                                              skipped_years_list)
 
 
 @click.group()
