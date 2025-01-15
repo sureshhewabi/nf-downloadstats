@@ -12,7 +12,7 @@ resource_identifiers:
   - '/pride/data/archive'
 completeness:
   - complete
-
+accession_pattern: "^PXD\\d{6}$"
 ############# Statistics Reports #############
 
 report_template: "pride_report.html"

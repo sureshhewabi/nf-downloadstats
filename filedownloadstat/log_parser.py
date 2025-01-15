@@ -1,4 +1,5 @@
 import gzip
+import re
 from datetime import datetime
 import warnings
 
@@ -18,8 +19,7 @@ class LogParser:
         self.RESOURCE_IDENTIFIERS = resource_list
         self.completeness = {c.lower().strip() for c in completeness_list}
 
-
-    def parse_gzipped_tsv(self, batch_size):
+    def parse_gzipped_tsv(self, batch_size: int, accession_pattern: str):
         """
         Read the gzipped TSV file, parse each line, and yield data in batches.
         :param batch_size: Number of rows to include in each batch.
@@ -33,7 +33,7 @@ class LogParser:
                     line = line.replace('\\t', '\t')  # Replace literal '\t' with actual tab
                     row = line.strip().split('\t')  # Split each line by tab
                     if len(row) == 13:
-                        if self.is_relevant_row(row):
+                        if self.is_relevant_row(row, accession_pattern):
                             parsed_line = self.parse_row(row)
                             if parsed_line:
                                 batch.append(parsed_line)
@@ -52,15 +52,20 @@ class LogParser:
         except Exception as e:
             print(f"Got an exception while processing file {self.file_path}: {e}")
 
-    def is_relevant_row(self, row):
+    def is_relevant_row(self, row, accession_pattern):
         """
         Checks if the row matches the criteria based on resource identifiers and completeness.
         :param row: List of row values
+        :param accession_pattern: Accession regex pattern
         :return: Boolean indicating if the row is relevant
         """
+        accession_field = row[3].split('/')[-2]
+        accession_regex = re.compile(accession_pattern)
+
         return (
                 any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS) and
                 row[6].lower().strip() in self.completeness
+                and bool(accession_regex.match(accession_field))
         )
 
     def parse_row(self, row):
