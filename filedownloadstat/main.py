@@ -80,11 +80,18 @@ def get_log_files(root_dir: str, output: str, protocols: str, public: str):
     required=False,
     type=int
 )
-def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, batch: int = 1000):
+@click.option(
+    "-a",
+    "--accession_pattern",
+    help="Resource accession pattern as a regular expression(Eg: PRIDE accessions '^PXD\\d{6}$'",
+    required=True,
+    type=str
+)
+def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, batch: int, accession_pattern: str):
     resource_list = resource.split(",")
     completeness_list = complete.split(",")
     fileutil = FileUtil()
-    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch)
+    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch, accession_pattern)
 
 
 @click.command("run_log_file_stat",

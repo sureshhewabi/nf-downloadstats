@@ -43,6 +43,7 @@ Batch Size          : ${params.log_file_batch_size}
 Resource Base URL   : ${params.resource_base_url}
 Report copy location: ${params.report_copy_filepath}
 Skipped Years       : ${params.skipped_years}
+Accession Pattern   : ${params.accession_pattern}
 
  """
 
@@ -105,6 +106,7 @@ process process_log_file {
         -r "${params.resource_identifiers.join(",")}" \
         -c "${params.completeness.join(",")}" \
         -b ${params.log_file_batch_size} \
+        -a ${params.accession_pattern} \
         > process_log_file.log 2>&1
     """
 }
