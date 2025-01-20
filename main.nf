@@ -207,6 +207,6 @@ workflow {
     run_file_download_stat(analyze_parquet_files.out.all_data)
 
     // Step 5: Upload the JSON file
-//     uploadJsonFile(summed_accession_counts) // TODO: Only testing purpose
+    uploadJsonFile(summed_accession_counts)
 
 }
