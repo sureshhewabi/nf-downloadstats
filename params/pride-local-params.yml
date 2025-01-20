@@ -22,6 +22,7 @@ completeness:
 
 report_template: "pride_report.html"
 skipped_years:
+  - 2020
   - 2025
 resource_base_url: 'https://www.ebi.ac.uk/pride/archive/projects/'
 report_copy_filepath:
