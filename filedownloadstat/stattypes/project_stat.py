@@ -45,7 +45,7 @@ class ProjectStat:
             y="count",
             color="method",
             barmode="group",  # Group bars by method
-            title="Yearly Total Downloads Separated by Method",
+            title="Yearly Total Downloads Separated by Method (Including Totals)",
             labels={"count": "Downloads", "year": "Year", "method": "Download Method"}
         )
         fig.write_html('yearly_download.html')

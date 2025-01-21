@@ -16,7 +16,12 @@ class FileDownloadStat:
         # --------------- 1. yearly_downloads ---------------
         # Group data by year and method, count occurrences
         yearly_downloads = df.groupby(["year", "method"]).size().reset_index(name="count")
-        ProjectStat.yearly_download(yearly_downloads)
+        yearly_totals = yearly_downloads.groupby("year", as_index=False)["count"].sum()
+        yearly_totals["method"] = "Total"  # Add a 'Total' label for the method
+
+        # Combine the original data with the totals
+        combined_data = pd.concat([yearly_downloads, yearly_totals], ignore_index=True)
+        ProjectStat.yearly_download(combined_data)
 
         # --------------- 2. Monthly_downloads ---------------
         # Add a `month_year` column
