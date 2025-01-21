@@ -76,6 +76,10 @@ class ProjectStat:
             labels={"download_count": "Number of Downloads", "num_projects": "Number of Projects"},
             markers=True  # Add markers to highlight points
         )
+        # Update layout to ensure x-axis starts at 0 and remove negative scale
+        fig.update_layout(
+            xaxis=dict(range=[0, None])  # Start at 0, let Plotly determine the max
+        )
         fig.write_html('project_downloads_histogram_1.html')
 
     @staticmethod
