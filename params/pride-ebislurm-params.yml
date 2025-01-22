@@ -9,17 +9,17 @@ protocols:
 public_private:
   - public
 resource_identifiers:
-  - '/pride/data/archive'
+  - /pride/data/archive
+accession_pattern: '^PXD\\d{6}$'
 completeness:
   - complete
-accession_pattern: "^PXD\\d{6}$"
 ############# Statistics Reports #############
 
 report_template: "pride_report.html"
 skipped_years:
   - 2020
   - 2025
-base_url: 'https://www.ebi.ac.uk/pride/archive/projects/'
+resource_base_url: 'https://www.ebi.ac.uk/pride/archive/projects/'
 report_copy_filepath:
 
 ############# Push to a Database(e.g MongoDB) #############

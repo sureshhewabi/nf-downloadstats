@@ -8,16 +8,11 @@ protocols:
   - ftp
 public_private:
   - public
-#  - private
 resource_identifiers:
   - /pride/data/archive
-#  - /gridftp/empiar
-#  - /nfs/era-pub
 accession_pattern: '^PXD\\d{6}$'
 completeness:
   - complete
-#  - incomplete
-
 ############# Statistics Reports #############
 
 report_template: "pride_report.html"
