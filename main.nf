@@ -119,8 +119,8 @@ process analyze_parquet_files {
     val all_parquet_files  // A comma-separated string of file paths
 
     output:
-    path("file_download_counts.json"), emit: file_download_counts
     path("summed_accession_counts.json"), emit: summed_accession_counts
+    path("file_download_counts.json"), emit: file_download_counts
     path("all_data.json"), emit: all_data
 
     script:
@@ -158,19 +158,35 @@ process run_file_download_stat {
 }
 
 
-process uploadJsonFile {
+process update_project_download_counts {
 
     input:
-    path jsonFile // The JSON file to upload
+    path summed_accession_counts // The JSON file to upload
 
     output:
-    path "upload_response.txt" // Capture the response from the server
+    path "upload_response_file_downloads_per_project.txt" // Capture the response from the server
 
     script:
     """
-    curl --location '${params.api_endpoint_file_download_per_project}' \
+    curl --location '${params.api_endpoint_file_downloads_per_project}' \
     --header '${params.api_endpoint_header}' \
-    --form 'files=@\"${jsonFile}\"' > upload_response.txt
+    --form 'files=@\"${summed_accession_counts}\"' > upload_response_file_downloads_per_project.txt
+    """
+}
+
+process update_file_download_counts {
+
+    input:
+    path file_download_counts // The JSON file to upload
+
+    output:
+    path "upload_response_file_downloads_per_file.txt" // Capture the response from the server
+
+    script:
+    """
+    curl --location '${params.api_endpoint_file_downloads_per_file}' \
+    --header '${params.api_endpoint_header}' \
+    --form 'files=@\"${file_download_counts}\"' > upload_response_file_downloads_per_file.txt
     """
 }
 
@@ -206,7 +222,9 @@ workflow {
     // Step 4: Generate Statistics for file downloads
     run_file_download_stat(analyze_parquet_files.out.all_data)
 
-    // Step 5: Upload the JSON file
-    uploadJsonFile(analyze_parquet_files.out.summed_accession_counts)
+    // Step 5: Update project level downloads in MongoDB
+    update_project_download_counts(analyze_parquet_files.out.summed_accession_counts)
 
+    // Step 6: Update project level downloads in MongoDB
+    update_file_download_counts(analyze_parquet_files.out.file_download_counts)
 }
