@@ -25,3 +25,4 @@ report_copy_filepath:
 ############# Push to a Database(e.g MongoDB) #############
 
 log_file_batch_size: 1000
+chunk_size: 100000
