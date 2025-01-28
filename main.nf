@@ -14,7 +14,6 @@ params.root_dir=''
 params.output_file='parsed_data.parquet'
 params.log_file=''
 params.api_endpoint_file_download_per_project=''
-params.api_endpoint_header=''
 params.protocols=''
 
 
@@ -44,6 +43,7 @@ Resource Base URL   : ${params.resource_base_url}
 Report copy location: ${params.report_copy_filepath}
 Skipped Years       : ${params.skipped_years}
 Accession Pattern   : ${params.accession_pattern}
+chunk size for file: ${params.chunk_size}
 
  """
 
@@ -119,8 +119,8 @@ process analyze_parquet_files {
     val all_parquet_files  // A comma-separated string of file paths
 
     output:
-    path("file_download_counts.json"), emit: file_download_counts
     path("summed_accession_counts.json"), emit: summed_accession_counts
+    path("file_download_counts.json"), emit: file_download_counts
     path("all_data.json"), emit: all_data
 
     script:
@@ -137,6 +137,7 @@ process analyze_parquet_files {
 }
 
 process run_file_download_stat {
+
     label 'process_low'
 
     input:
@@ -158,22 +159,94 @@ process run_file_download_stat {
 }
 
 
-process uploadJsonFile {
+process update_project_download_counts {
+
+    label 'error_retry'
 
     input:
-    path jsonFile // The JSON file to upload
+    path summed_accession_counts // The JSON file to upload
 
     output:
-    path "upload_response.txt" // Capture the response from the server
+    path "upload_response_file_downloads_per_project.txt" // Capture the response from the server
 
     script:
     """
-    curl --location '${params.api_endpoint_file_download_per_project}' \
+    curl --location --max-time 300 '${params.api_endpoint_file_downloads_per_project}' \
     --header '${params.api_endpoint_header}' \
-    --form 'files=@\"${jsonFile}\"' > upload_response.txt
+    --form 'files=@\"${summed_accession_counts}\"' > upload_response_file_downloads_per_project.txt
     """
 }
 
+process update_file_download_counts {
+
+    label 'error_retry'
+
+    input:
+    path file_download_counts // The large JSON file to process
+
+    script:
+    """
+    # Create directories for split files and responses
+    mkdir -p split_files upload_responses
+
+    # Initialize variables
+    chunk_size=${params.chunk_size}  # Number of objects per chunk
+    total_lines=\$(jq '. | length' ${file_download_counts})  # Total number of objects in JSON
+    chunk_number=0
+    start_index=0
+
+    echo "=== STARTING PROCESS ==="
+    echo "Total lines in input JSON: \$total_lines"
+    echo "Chunk size: \$chunk_size"
+
+    # Split the JSON file into chunks
+    while [ \$start_index -lt \$total_lines ]; do
+        end_index=\$((start_index + chunk_size))
+        echo "Creating chunk \$chunk_number: Start index = \$start_index, End index = \$end_index"
+
+        # Use jq to extract a chunk of JSON objects
+        jq -c ". | .[\${start_index}:\${end_index}]" ${file_download_counts} > "split_files/part_\${chunk_number}.json"
+        chunk_file="split_files/part_\${chunk_number}.json"
+
+        # Check if the chunk file is valid and non-empty
+        if [ -s "\$chunk_file" ]; then
+            echo "Chunk file created: \$chunk_file (Size: \$(wc -c < "\$chunk_file") bytes)"
+        else
+            echo "Warning: Chunk file \$chunk_file is empty!"
+        fi
+
+        # Increment start index and chunk number
+        start_index=\$((end_index))
+        chunk_number=\$((chunk_number + 1))
+    done
+
+    echo "=== CHUNKING COMPLETED ==="
+    echo "Total chunks created: \$chunk_number"
+    echo "Files in split_files directory:"
+    ls -lh split_files/
+
+    # Process and upload each JSON file
+    for part_file in split_files/*; do
+        echo "Processing file: \$part_file (Size: \$(wc -c < "\$part_file") bytes)"
+
+        # Upload the JSON file and capture the server response
+        curl --location --max-time 300 '${params.api_endpoint_file_downloads_per_file}' \
+             --header '${params.api_endpoint_header}' \
+             --form "files=@\${part_file}" \
+             > "upload_responses/\$(basename \${part_file})_response.txt"
+
+        if [ \$? -eq 0 ]; then
+            echo "Response saved to upload_responses/\$(basename \${part_file})_response.txt"
+        else
+            echo "Error: Upload failed for file \$part_file"
+        fi
+    done
+
+    echo "=== UPLOAD COMPLETED ==="
+    echo "Responses saved in upload_responses/ directory:"
+    ls -lh upload_responses/
+    """
+}
 
 workflow {
     // Step 1: Gather file names
@@ -206,7 +279,9 @@ workflow {
     // Step 4: Generate Statistics for file downloads
     run_file_download_stat(analyze_parquet_files.out.all_data)
 
-    // Step 5: Upload the JSON file
-    uploadJsonFile(analyze_parquet_files.out.summed_accession_counts)
+    // Step 5: Update project level downloads in MongoDB
+    update_project_download_counts(analyze_parquet_files.out.summed_accession_counts)
 
+    // Step 6: Update project level downloads in MongoDB
+    update_file_download_counts(analyze_parquet_files.out.file_download_counts)
 }
