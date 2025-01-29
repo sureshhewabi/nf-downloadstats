@@ -10,6 +10,7 @@ public_private:
   - public
 resource_identifiers:
   - /pride/data/archive
+  - /pride-archive
 accession_pattern: '^PXD\\d{6}$'
 completeness:
   - complete
