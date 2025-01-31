@@ -43,7 +43,8 @@ Resource Base URL   : ${params.resource_base_url}
 Report copy location: ${params.report_copy_filepath}
 Skipped Years       : ${params.skipped_years}
 Accession Pattern   : ${params.accession_pattern}
-chunk size for file: ${params.chunk_size}
+chunk size for file : ${params.chunk_size}
+Disable DB Update   : ${params.disable_db_update}
 api_endpoint_file_downloads_per_project : ${params.api_endpoint_file_downloads_per_project}
 api_endpoint_file_downloads_per_file    : ${params.api_endpoint_file_downloads_per_file}
 
@@ -282,8 +283,16 @@ workflow {
     run_file_download_stat(analyze_parquet_files.out.all_data)
 
     // Step 5: Update project level downloads in MongoDB
-    update_project_download_counts(analyze_parquet_files.out.summed_accession_counts)
+     if (!params.disable_db_update) {
+        update_project_download_counts(analyze_parquet_files.out.summed_accession_counts)
+     } else {
+        println "Skipping update_project_download_counts because disable_db_update=true"
+    }
 
     // Step 6: Update project level downloads in MongoDB
-    update_file_download_counts(analyze_parquet_files.out.file_download_counts)
+    if (!params.disable_db_update) {
+        update_file_download_counts(analyze_parquet_files.out.file_download_counts)
+    } else {
+        println "Skipping update_file_download_counts because disable_db_update=true"
+    }
 }
