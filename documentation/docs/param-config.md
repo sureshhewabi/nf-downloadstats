@@ -21,7 +21,6 @@
   - **Values:**
     - `/pride/data/archive`: Path to PRIDE archive data.
     - `/pride-archive`: Path to an alternate PRIDE archive.
-    - `/xfer/public/pride`: Path for publicly available PRIDE data transfer.
 
 - **`accession_pattern`**  
   A regular expression pattern to validate the accession IDs of the dataset.
@@ -63,7 +62,7 @@ However, create your own template for your resource by customizing this template
 
 - **`report_copy_filepath`**  
   The file path where the report copy will be saved after processing.
-  - **Default:** `/Users/hewapathirana/Desktop`
+  - **Default:** `/your/path/Desktop`
   - **Explanation:** The generated report will be saved to this location on the local system.
 
 ---
@@ -98,7 +97,6 @@ public_private:
 resource_identifiers:
   - /pride/data/archive
   - /pride-archive
-  - /xfer/public/pride
 accession_pattern: '^PXD\\d{6}$'
 completeness:
   - complete
