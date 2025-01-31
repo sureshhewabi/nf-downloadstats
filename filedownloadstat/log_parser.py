@@ -14,12 +14,13 @@ class LogParser:
 
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, file_path, resource_list, completeness_list):
+    def __init__(self, file_path, resource_list, completeness_list, accession_pattern: str):
         self.file_path = file_path
         self.RESOURCE_IDENTIFIERS = resource_list
         self.completeness = {c.lower().strip() for c in completeness_list}
+        self.accession_pattern = accession_pattern
 
-    def parse_gzipped_tsv(self, batch_size: int, accession_pattern: str):
+    def parse_gzipped_tsv(self, batch_size: int ):
         """
         Read the gzipped TSV file, parse each line, and yield data in batches.
         :param batch_size: Number of rows to include in each batch.
@@ -32,19 +33,14 @@ class LogParser:
                 for line_no, line in enumerate(log_file, start=1):
                     line = line.replace('\\t', '\t')  # Replace literal '\t' with actual tab
                     row = line.strip().split('\t')  # Split each line by tab
-                    if len(row) == 13:
-                        if self.is_relevant_row(row, accession_pattern):
-                            parsed_line = self.parse_row(row)
-                            if parsed_line:
-                                batch.append(parsed_line)
-                                # Yield the batch when it reaches the desired size
-                                if len(batch) == batch_size:
-                                    yield batch
-                                    batch = []  # Reset the batch after yielding
-                    else:
-                        print("WARNING----!!! Number of columns expected was 13 found ", len(row), " in line no ",
-                              line_no, " and row is :", row)
-            # Yield any remaining data in the batch
+
+                    parsed_line = self.parse_row(row, line_no)
+                    if parsed_line:
+                        batch.append(parsed_line)
+                        # Yield the batch when it reaches the desired size
+                        if len(batch) == batch_size:
+                            yield batch
+                            batch = []  # Reset the batch after yielding
             if batch:
                 yield batch
         except OSError as e:
@@ -52,15 +48,14 @@ class LogParser:
         except Exception as e:
             print(f"Got an exception while processing file {self.file_path}: {e}")
 
-    def is_relevant_row(self, row, accession_pattern):
+    def is_relevant_row(self, row):
         """
         Checks if the row matches the criteria based on resource identifiers and completeness.
         :param row: List of row values
-        :param accession_pattern: Accession regex pattern
         :return: Boolean indicating if the row is relevant
         """
         accession_field = row[3].split('/')[-2]
-        accession_regex = re.compile(accession_pattern)
+        accession_regex = re.compile(self.accession_pattern)
 
         return (
                 any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS) and
@@ -68,35 +63,40 @@ class LogParser:
                 and bool(accession_regex.match(accession_field))
         )
 
-    def parse_row(self, row):
+    def parse_row(self, row, line_no):
         """
         Define a function to parse each row by extracting fields by column index
         :param row:
+        :param line_no:
         :return:
         """
+        if len(row) == 13:
+            if self.is_relevant_row(row):
+                try:
+                    timestamp = self.clean_timestamp(row[0])
+                    parsed_time = datetime.strptime(timestamp, self.DATETIME_FORMAT)
 
-        try:
-            timestamp = self.clean_timestamp(row[0])
-            parsed_time = datetime.strptime(timestamp, self.DATETIME_FORMAT)
+                    # Extract year, month, and date
+                    year = parsed_time.year
+                    month = parsed_time.month
+                    date = parsed_time.date()
 
-            # Extract year, month, and date
-            year = parsed_time.year
-            month = parsed_time.month
-            date = parsed_time.date()
-
-            return {
-                "date": date,  # Date
-                "year": year,
-                "month": month,
-                "user": row[1].strip(),
-                "accession": row[3].split('/')[-2],  # Project accession of the resource(eg: PXD accession in PRIDE)
-                "filename": row[3].split('/')[-1],  # Files that are associate to a project(project acceesion)
-                "completed": row[6].lower().strip(),  # Completion Status (e.g., Complete or Incomplete)
-                "country": row[7],  # Country
-                "method": row[11],  # Method (e.g., ftp, aspera)
-            }
-        except IndexError:
-            return None
+                    return {
+                        "date": date,  # Date
+                        "year": year,
+                        "month": month,
+                        "user": row[1].strip(),
+                        "accession": row[3].split('/')[-2],  # Project accession of the resource(eg: PXD accession in PRIDE)
+                        "filename": row[3].split('/')[-1],  # Files that are associate to a project(project acceesion)
+                        "completed": row[6].lower().strip(),  # Completion Status (e.g., Complete or Incomplete)
+                        "country": row[7],  # Country
+                        "method": row[11],  # Method (e.g., ftp, aspera)
+                    }
+                except IndexError:
+                    return None
+        else:
+            print("WARNING----!!! Number of columns expected was 13 found ", len(row), " in line no ",
+                  line_no, " and row is :", row)
 
     @staticmethod
     def clean_timestamp(timestamp):
