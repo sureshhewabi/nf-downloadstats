@@ -1,5 +1,21 @@
-site_name: File Download Stat
+site_name: File Downloads Statistics
 nav:
   - Home: index.md
   - About: about.md
-theme: readthedocs
+  - Configurations: param-config.md
+  - Limitations: limitations.md
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: green
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
