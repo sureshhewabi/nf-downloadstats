@@ -86,10 +86,10 @@ class FileUtil:
 
             print(f"Parsing file and writing output to {parquet_output_file}")
 
-            lp = LogParser(file_path, resource_list, completeness_list)
+            lp = LogParser(file_path, resource_list, completeness_list, accession_pattern)
             writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
 
-            for batch in lp.parse_gzipped_tsv(batch_size, accession_pattern):
+            for batch in lp.parse_gzipped_tsv(batch_size):
                 if writer.write_batch(batch):
                     data_written = True
 

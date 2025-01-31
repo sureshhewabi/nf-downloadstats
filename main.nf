@@ -44,6 +44,8 @@ Report copy location: ${params.report_copy_filepath}
 Skipped Years       : ${params.skipped_years}
 Accession Pattern   : ${params.accession_pattern}
 chunk size for file: ${params.chunk_size}
+api_endpoint_file_downloads_per_project : ${params.api_endpoint_file_downloads_per_project}
+api_endpoint_file_downloads_per_file    : ${params.api_endpoint_file_downloads_per_file}
 
  """
 
