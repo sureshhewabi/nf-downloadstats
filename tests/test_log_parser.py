@@ -70,7 +70,7 @@ class TestLogParser(unittest.TestCase):
     def test_valid_row_globus(self):
         """Test parsing a correctly formatted row."""
 
-        row = [
+        globus_row = [
                 "2023-11-16T14:17:18.963Z",
                 "206692352bb826652461c90c0e056045282f508d",
                 "619815434",
@@ -85,7 +85,31 @@ class TestLogParser(unittest.TestCase):
                 "gridftp-globus",
                 "public"
                 ]
-        parsed = self.parser.parse_row(row, 1)
+
+        parsed = self.parser.parse_row(globus_row, 1)
+        self.assertIsNotNone(parsed, dict)
+
+    def test_valid_row_http(self):
+        """Test parsing a correctly formatted row."""
+
+        # real log file from: http / public / 2023 / 01 / 01
+        http_row = [
+                    "2023-01-01T23:48:06.000Z",
+                    "599e60a8a2abb676f6c8143315c3819be4613ac4",
+                    "572328757",
+                    "/pride/data/archive/2022/11/PXD029198/D3.raw",
+                    "OUT",
+                    "03dbae9a96db63fa62487cd3c134d05230858127",
+                    "Complete",
+                    "United States",
+                    "New Jersey",
+                    "Dayton",
+                    "40.3864,-74.5111",
+                    "http",
+                    "public"
+                    ]
+
+        parsed = self.parser.parse_row(http_row, 1)
         self.assertIsNotNone(parsed, dict)
 
 if __name__ == '__main__':

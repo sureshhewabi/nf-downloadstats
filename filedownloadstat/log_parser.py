@@ -27,13 +27,11 @@ class LogParser:
         :return: Generator that yields batches of parsed data.
         """
         batch = []
-
         try:
             with gzip.open(self.file_path, "rt", encoding="utf-8") as log_file:
                 for line_no, line in enumerate(log_file, start=1):
                     line = line.replace('\\t', '\t')  # Replace literal '\t' with actual tab
                     row = line.strip().split('\t')  # Split each line by tab
-
                     parsed_line = self.parse_row(row, line_no)
                     if parsed_line:
                         batch.append(parsed_line)
@@ -41,8 +39,8 @@ class LogParser:
                         if len(batch) == batch_size:
                             yield batch
                             batch = []  # Reset the batch after yielding
-            if batch:
-                yield batch
+                if batch:
+                    yield batch
         except OSError as e:
             print(f"Skipping corrupted file: {self.file_path} due to {e}")
         except Exception as e:
@@ -54,14 +52,20 @@ class LogParser:
         :param row: List of row values
         :return: Boolean indicating if the row is relevant
         """
-        accession_field = row[3].split('/')[-2]
-        accession_regex = re.compile(self.accession_pattern)
+        if  '/' in row[3]:
+            accession_field = row[3].strip().split('/')[-2]
+            accession_regex = re.compile(self.accession_pattern)
 
-        return (
-                any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS) and
-                row[6].lower().strip() in self.completeness
-                and bool(accession_regex.match(accession_field))
-        )
+            return (
+                    row[6].lower().strip() in self.completeness and  # complete and/or partial download
+                    any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS) and
+                    bool(accession_regex.match(accession_field)) and  # should follow accession patterns
+                    row[3].split('/')[-1] is not None and # filename cannot be null
+                    row[3].split('/')[-1] != "" # filename cannot be null
+            )
+        else:
+            # print(f"No file path found in "+ str(row))
+            return False
 
     def parse_row(self, row, line_no):
         """
@@ -92,11 +96,15 @@ class LogParser:
                         "country": row[7],  # Country
                         "method": row[11],  # Method (e.g., ftp, aspera)
                     }
-                except IndexError:
-                    return None
+                except IndexError as e:
+                    print(f"Error processing line {line_no} with row {row}: {e}")
+                    raise IndexError(f"IndexError: Row {line_no} with insufficient columns: {row}. Error: {e}")
+            else:
+                # print(f"Row not relevant at line {line_no}: {row}")
+                return None
         else:
-            print("WARNING----!!! Number of columns expected was 13 found ", len(row), " in line no ",
-                  line_no, " and row is :", row)
+            print(f"WARNING: Expected 13 columns but found {len(row)} columns at line {line_no}. Row: {row}")
+            return None
 
     @staticmethod
     def clean_timestamp(timestamp):
