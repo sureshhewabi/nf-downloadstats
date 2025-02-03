@@ -2,7 +2,9 @@ site_name: File Downloads Statistics
 nav:
   - Home: index.md
   - About: about.md
-  - Configurations: param-config.md
+  - General Configurations: param-config.md
+  - Nextflow Config: nextflow-slurm-config.md
+  - GitLab Config: gitlab-config.md
   - Limitations: limitations.md
 theme:
   name: material
@@ -18,4 +20,5 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - admonition
 
