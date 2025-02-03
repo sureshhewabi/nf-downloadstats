@@ -26,3 +26,4 @@ work/
 .nextflow
 runStat.sh
 params.config
+scripts/run_stat.sh
