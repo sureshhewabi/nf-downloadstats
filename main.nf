@@ -183,6 +183,7 @@ process update_project_download_counts {
 process update_file_download_counts {
 
     label 'error_retry'
+    label 'process_medium_memory'
 
     input:
     path file_download_counts // The large JSON file to process
