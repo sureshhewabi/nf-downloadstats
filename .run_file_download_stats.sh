@@ -8,7 +8,7 @@
 JOB1_NAME="file-downloads-stat-copy-data"
 JOB2_NAME="file-downloads-stat-analysis"
 # memory limit
-MEMORY_LIMIT=12G
+MEMORY_LIMIT=7G
 #email notification
 JOB_EMAIL="pride-report@ebi.ac.uk"
 
