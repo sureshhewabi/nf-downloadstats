@@ -114,27 +114,49 @@ process process_log_file {
     """
 }
 
-process analyze_parquet_files {
+process merge_parquet_files {
 
-    label 'process_low'
+    label 'process_medium_memory'
 
     input:
     val all_parquet_files  // A comma-separated string of file paths
 
     output:
-    path("summed_accession_counts.json"), emit: summed_accession_counts
-    path("file_download_counts.json"), emit: file_download_counts
-    path("all_data.json"), emit: all_data
+    path("output_parquet"), emit: output_parquet
 
     script:
     """
     # Write the file paths to a temporary file, because otherwise Argument list(file list) will be too long
     echo "${all_parquet_files.join('\n')}" > all_parquet_files_list.txt
 
-    python3 ${workflow.projectDir}/filedownloadstat/main.py get_file_counts \
+    python3 ${workflow.projectDir}/filedownloadstat/main.py merge_parquet_files \
         --input_dir all_parquet_files_list.txt \
-        --output_grouped file_download_counts.json \
-        --output_summed summed_accession_counts.json \
+        --output_parquet "output_parquet"
+    """
+}
+
+process analyze_parquet_files {
+
+    label 'process_low'
+
+    input:
+    val output_parquet
+
+    output:
+    path("project_level_download_counts.json"), emit: project_level_download_counts
+    path("file_level_download_counts.json"), emit: file_level_download_counts
+    path("project_level_yearly_download_counts.json"), emit: project_level_yearly_download_counts
+    path("project_level_top_download_counts.json"), emit: project_level_top_download_counts
+    path("all_data.json"), emit: all_data
+
+    script:
+    """
+    python3 ${workflow.projectDir}/filedownloadstat/main.py analyze_parquet_files \
+        --output_parquet ${output_parquet} \
+        --project_level_download_counts project_level_download_counts.json \
+        --file_level_download_counts file_level_download_counts.json \
+        --project_level_yearly_download_counts project_level_yearly_download_counts.json \
+        --project_level_top_download_counts project_level_top_download_counts.json \
         --all_data all_data.json
     """
 }
@@ -167,7 +189,7 @@ process update_project_download_counts {
     label 'error_retry'
 
     input:
-    path summed_accession_counts // The JSON file to upload
+    path project_level_download_counts // The JSON file to upload
 
     output:
     path "upload_response_file_downloads_per_project.txt" // Capture the response from the server
@@ -176,17 +198,17 @@ process update_project_download_counts {
     """
     curl --location --max-time 300 '${params.api_endpoint_file_downloads_per_project}' \
     --header '${params.api_endpoint_header}' \
-    --form 'files=@\"${summed_accession_counts}\"' > upload_response_file_downloads_per_project.txt
+    --form 'files=@\"${project_level_download_counts}\"' > upload_response_file_downloads_per_project.txt
     """
 }
 
-process update_file_download_counts {
+process update_file_level_download_counts {
 
     label 'error_retry'
     label 'process_medium_memory'
 
     input:
-    path file_download_counts // The large JSON file to process
+    path file_level_download_counts // The large JSON file to process
 
     script:
     """
@@ -195,7 +217,7 @@ process update_file_download_counts {
 
     # Initialize variables
     chunk_size=${params.chunk_size}  # Number of objects per chunk
-    total_lines=\$(jq '. | length' ${file_download_counts})  # Total number of objects in JSON
+    total_lines=\$(jq '. | length' ${file_level_download_counts})  # Total number of objects in JSON
     chunk_number=0
     start_index=0
 
@@ -209,7 +231,7 @@ process update_file_download_counts {
         echo "Creating chunk \$chunk_number: Start index = \$start_index, End index = \$end_index"
 
         # Use jq to extract a chunk of JSON objects
-        jq -c ". | .[\${start_index}:\${end_index}]" ${file_download_counts} > "split_files/part_\${chunk_number}.json"
+        jq -c ". | .[\${start_index}:\${end_index}]" ${file_level_download_counts} > "split_files/part_\${chunk_number}.json"
         chunk_file="split_files/part_\${chunk_number}.json"
 
         # Check if the chunk file is valid and non-empty
@@ -273,27 +295,31 @@ workflow {
         .collect()                  // Collect all parquet files into a single list
         .set { parquet_file_list }  // Save the collected files as a new channel
 
+    merge_parquet_files(parquet_file_list)
+
     // Step 3: Analyze Parquet files
-    analyze_parquet_files(parquet_file_list)
+    analyze_parquet_files(merge_parquet_files.out.output_parquet)
 
     // Debug: View individual outputs
-    analyze_parquet_files.out.file_download_counts.view()
-    analyze_parquet_files.out.summed_accession_counts.view()
+    analyze_parquet_files.out.project_level_download_counts.view()
+    analyze_parquet_files.out.file_level_download_counts.view()
+    analyze_parquet_files.out.project_level_yearly_download_counts.view()
+    analyze_parquet_files.out.project_level_top_download_counts.view()
 
     // Step 4: Generate Statistics for file downloads
     run_file_download_stat(analyze_parquet_files.out.all_data)
 
     // Step 5: Update project level downloads in MongoDB
      if (!params.disable_db_update) {
-        update_project_download_counts(analyze_parquet_files.out.summed_accession_counts)
+        update_project_download_counts(analyze_parquet_files.out.project_level_download_counts)
      } else {
         println "Skipping update_project_download_counts because disable_db_update=true"
     }
 
     // Step 6: Update project level downloads in MongoDB
     if (!params.disable_db_update) {
-        update_file_download_counts(analyze_parquet_files.out.file_download_counts)
+        update_file_level_download_counts(analyze_parquet_files.out.file_level_download_counts)
     } else {
-        println "Skipping update_file_download_counts because disable_db_update=true"
+        println "Skipping update_file_level_download_counts because disable_db_update=true"
     }
 }

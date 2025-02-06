@@ -132,28 +132,66 @@ def read_parquet_files(file: str):
 
 
 @click.command(
-    "get_file_counts",
-    short_help="Get file counts from parquet files",
+    "merge_parquet_files",
+    short_help="Merge Parquet Files into a single file",
 )
 @click.option("-f",
               "--input_dir",
               required=True,
               )
+@click.option("-m",
+              "--output_parquet",
+              required=True,
+              )
+
+def merge_parquet_files(input_dir, output_parquet):
+    stat_parquet = StatParquet()
+    result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
+
+
+@click.command(
+    "analyze_parquet_files",
+    short_help="Get file counts from parquet files",
+)
+@click.option("-m",
+              "--output_parquet",
+              required=True,
+              )
 @click.option("-g",
-              "--output_grouped",
+              "--project_level_download_counts",
               required=True,
               )
 @click.option("-s",
-              "--output_summed",
+              "--file_level_download_counts",
+              required=True,
+              )
+@click.option("-y",
+              "--project_level_yearly_download_counts",
+              required=True,
+              )
+@click.option("-t",
+              "--project_level_top_download_counts",
               required=True,
               )
 @click.option("-a",
               "--all_data",
               required=True,
               )
-def get_file_counts(input_dir, output_summed, output_grouped, all_data):
+def analyze_parquet_files(
+                    output_parquet,
+                    project_level_download_counts,
+                    file_level_download_counts,
+                    project_level_yearly_download_counts,
+                    project_level_top_download_counts,
+                    all_data):
     stat_parquet = StatParquet()
-    result = stat_parquet.get_file_counts(input_dir, output_grouped, output_summed, all_data)
+    result = stat_parquet.analyze_parquet_files(
+                                          output_parquet,
+                                          project_level_download_counts,
+                                          file_level_download_counts,
+                                          project_level_yearly_download_counts,
+                                          project_level_top_download_counts,
+                                          all_data)
     print(result)
 
 
@@ -221,7 +259,8 @@ def cli():
 cli.add_command(get_log_files)
 cli.add_command(run_log_file_stat)
 cli.add_command(process_log_file)
-cli.add_command(get_file_counts)
+cli.add_command(merge_parquet_files)
+cli.add_command(analyze_parquet_files)
 cli.add_command(run_file_download_stat)
 
 # =============== Additional Features ===============
