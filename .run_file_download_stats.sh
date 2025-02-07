@@ -39,37 +39,41 @@ DATE=$(date +"%Y%m%d%H%M")
 ##### Change directory to where the script locate
 cd ${0%/*}
 
-#### RUN the first job on the cluster #####
-JOB_ID=$(sbatch --time=00:07:00  \
-    --mem="${MEMORY_LIMIT}" \
-    -p datamover \
-    --mail-type=ALL \
-    --mail-user="${JOB_EMAIL}" \
-    --job-name="${JOB1_NAME}" <<EOF
-#!/bin/bash
-rsync -ah --progress --stats \
-    "${LOGS_SOURCE_ROOT}/fasp-aspera/public" \
-    "${LOGS_SOURCE_ROOT}/ftp/public" \
-    "${LOGS_SOURCE_ROOT}/gridftp-globus/public" \
-    "${LOGS_SOURCE_ROOT}/http/public" \
-    "${LOGS_DESTINATION_ROOT}/"
-EOF
-)
+ JOB_ID=$(sbatch -t 1-0 \
+      --mem="${MEMORY_LIMIT}" \
+      -p datamover \
+      --mail-type=ALL \
+      --mail-user="${JOB_EMAIL}" \
+      --job-name="${JOB1_NAME}" <<EOF | awk '/Submitted batch job/ {print $NF}'
+ #!/bin/bash
+ rsync -ah --progress --stats "${LOGS_SOURCE_ROOT}/fasp-aspera/public/" "${LOGS_DESTINATION_ROOT}/fasp-aspera/public/"
+ rsync -ah --progress --stats "${LOGS_SOURCE_ROOT}/ftp/public/" "${LOGS_DESTINATION_ROOT}/ftp/public/"
+ rsync -ah --progress --stats "${LOGS_SOURCE_ROOT}/gridftp-globus/public/" "${LOGS_DESTINATION_ROOT}/gridftp-globus/public/"
+ rsync -ah --progress --stats "${LOGS_SOURCE_ROOT}/http/public/" "${LOGS_DESTINATION_ROOT}/http/public/"
+ EOF
+ )
 
+ JOB_ID=$(echo "$JOB_ID" | awk '{print $NF}')
 
-# Extract the job ID from the sbatch output (e.g., "Submitted batch job 12345") This removes everything up to the first space, leaving only the job ID
-JOB_ID=${JOB_ID##* }
+ echo "Captured sbatch output: $JOB_ID"
 
-${CONDA_INIT}
-conda activate file_download_stat
-PROFILE="ebislurm"
+ if [[ -z "$JOB_ID" ]]; then
+     echo "ERROR: Job ID is empty! sbatch might have failed."
+     exit 1
+ fi
 
-#### RUN it on the cluster #####
-sbatch -t 7-0 \
-     --mem=${MEMORY_LIMIT} \
-     -p standard \
-     --mail-type=ALL \
-     --mail-user=${JOB_EMAIL} \
-     --job-name=${JOB2_NAME} \
-     --dependency=afterok:${JOB_ID} \
-     ./scripts/run_stat.sh ${PROFILE}
+ echo "${JOB1_NAME} job ID: ${JOB_ID}"
+
+ ${CONDA_INIT}
+ conda activate file_download_stat
+ PROFILE="ebislurm"
+
+ #### RUN it on the cluster #####
+ sbatch -t 3-0 \
+      --mem=${MEMORY_LIMIT} \
+      -p standard \
+      --mail-type=ALL \
+      --mail-user=${JOB_EMAIL} \
+      --job-name=${JOB2_NAME} \
+      --dependency=afterok:${JOB_ID} \
+      ./scripts/run_stat.sh ${PROFILE}
