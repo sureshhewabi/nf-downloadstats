@@ -137,7 +137,7 @@ process merge_parquet_files {
 
 process analyze_parquet_files {
 
-    label 'process_low'
+    label 'process_medium_memory'
 
     input:
     val output_parquet
