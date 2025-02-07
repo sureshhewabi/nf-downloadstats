@@ -52,7 +52,7 @@ api_endpoint_file_downloads_per_file    : ${params.api_endpoint_file_downloads_p
 
 process get_log_files {
 
-    label 'data_mover'
+//     label 'data_mover'
 
     input:
     val root_dir
@@ -90,7 +90,7 @@ process run_log_file_stat{
 process process_log_file {
 
     label 'process_very_low'
-    label 'data_mover'
+//     label 'data_mover'
 
 
     input:
