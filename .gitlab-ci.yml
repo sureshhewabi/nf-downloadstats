@@ -13,7 +13,7 @@ deploy:
   script:
     - envsubst < .params.config > params.config
     - envsubst '${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR},${API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT},${API_ENDPOINT_FILE_DOWNLOADS_PER_FILE},${API_ENDPOINT_HEADER}' < scripts/.run_stat.sh > scripts/run_stat.sh
-    - envsubst '${CONDA_INIT}' < .run_file_download_stats.sh > run_file_download_stats.sh
+    - envsubst '${CONDA_INIT},${LOGS_SOURCE_ROOT},${LOGS_DESTINATION_ROOT}' < .run_file_download_stats.sh > run_file_download_stats.sh
     - DEPLOY_DIR=$(date +"%Y%m%d_%H%M%S")
     - mkdir $DEPLOY_DIR
     - cp -r scripts $DEPLOY_DIR/
