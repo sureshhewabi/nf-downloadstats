@@ -39,6 +39,9 @@ class ProjectStat:
         """
         Create a bar chart with year on X-axis, count on Y-axis, and method as color
         """
+        # Ensure year is treated as a categorical variable
+        yearly_downloads["year"] = yearly_downloads["year"].astype(str)
+
         fig = px.bar(
             yearly_downloads,
             x="year",
