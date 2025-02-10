@@ -1,7 +1,6 @@
 site_name: File Downloads Statistics
 nav:
   - Home: index.md
-  - About: about.md
   - General Configurations: param-config.md
   - Nextflow Config: nextflow-slurm-config.md
   - GitLab Config: gitlab-config.md
