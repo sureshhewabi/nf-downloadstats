@@ -1,15 +1,10 @@
-import os
 from pathlib import Path
 
-from stattypes.project_stat import ProjectStat
-from stattypes.regional_stat import RegionalStat
-from stattypes.trends_stat import TrendsStat
-from stattypes.user_stat import UserStat
-from report import Report
+from stat_types import ProjectStat, RegionalStat, TrendsStat, UserStat
+from report_util import Report
 import pandas as pd
 
-
-class FileDownloadStat:
+class ReportStat:
 
     @staticmethod
     def project_stat(df: pd.DataFrame, baseurl: str):
@@ -116,10 +111,10 @@ class FileDownloadStat:
         # Filter out rows where 'year' is in skipped_years_list
         df = df[~df["year"].isin(skipped_years_list)]
 
-        FileDownloadStat.project_stat(df, baseurl)
-        FileDownloadStat.trends_stat(df)
-        FileDownloadStat.regional_stats(df)
-        FileDownloadStat.user_stats(df)
+        ReportStat.project_stat(df, baseurl)
+        ReportStat.trends_stat(df)
+        ReportStat.regional_stats(df)
+        ReportStat.user_stats(df)
 
         template_path = Path(__file__).resolve().parent.parent / "template" / report_template
 

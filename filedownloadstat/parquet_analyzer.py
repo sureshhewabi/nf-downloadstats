@@ -1,7 +1,7 @@
 import os
 import dask.dataframe as dd
 
-class StatParquet:
+class ParquetAnalyzer:
     def __init__(self):
         pass
 
