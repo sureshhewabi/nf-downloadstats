@@ -1,7 +1,8 @@
 import os
 import dask.dataframe as dd
+from scipy.stats import rankdata
 
-class StatParquet:
+class ParquetAnalyzer:
     def __init__(self):
         pass
 
@@ -31,6 +32,12 @@ class StatParquet:
 
         # Compute the result
         result = project_level_counts.compute()
+
+        # Calculate percentile rank for the 'count' column
+        result["percentile"] = (rankdata(result["count"], method="average") / len(result) * 100).astype(int)
+
+        # Sort by count in descending order
+        result = result.sort_values(by="count", ascending=False)
 
         # Save to JSON
         result.to_json(project_level_download_counts, orient="records", lines=False)

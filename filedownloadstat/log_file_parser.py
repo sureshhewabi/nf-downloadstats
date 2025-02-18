@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="dask.dataframe")
 
 
-class LogParser:
+class LogFileParser:
     """
     Class to parse the log file into parquet format
     """

@@ -1,12 +1,11 @@
 import os
-
 import click
 
-from log_file_stat import LogFileStat
-from file_download_stat import FileDownloadStat
+from log_file_analyzer import LogFileAnalyzer
+from log_file_util import FileUtil
+from parquet_analyzer import ParquetAnalyzer
 from parquet_reader import ParquetReader
-from stat_parquet import StatParquet
-from file_util import FileUtil
+from report_stat import ReportStat
 
 
 @click.command("get_log_files",
@@ -111,7 +110,7 @@ def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, 
     type=str
 )
 def run_log_file_stat(file: str, output: str):
-    log_file_stat = LogFileStat()
+    log_file_stat = LogFileAnalyzer()
     log_file_stat.run_log_file_stat(file, output)
 
 @click.command(
@@ -145,7 +144,7 @@ def read_parquet_files(file: str):
               )
 
 def merge_parquet_files(input_dir, output_parquet):
-    stat_parquet = StatParquet()
+    stat_parquet = ParquetAnalyzer()
     result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
 
 
@@ -184,7 +183,7 @@ def analyze_parquet_files(
                     project_level_yearly_download_counts,
                     project_level_top_download_counts,
                     all_data):
-    stat_parquet = StatParquet()
+    stat_parquet = ParquetAnalyzer()
     result = stat_parquet.analyze_parquet_files(
                                           output_parquet,
                                           project_level_download_counts,
@@ -244,28 +243,28 @@ def run_file_download_stat(file: str, output: str, report_template: str, baseurl
     # Convert the comma-separated string to a list of integers
     skipped_years_list = list(map(int, skipped_years.split(","))) if skipped_years else []
 
-    file_download_stat = FileDownloadStat()
+    file_download_stat = ReportStat()
     file_download_stat.run_file_download_stat(file, output, report_template, baseurl, report_copy_filepath,
                                               skipped_years_list)
 
 
 @click.group()
-def cli():
+def main():
     pass
 
 
 # =============== Features Used ===============
 
-cli.add_command(get_log_files)
-cli.add_command(run_log_file_stat)
-cli.add_command(process_log_file)
-cli.add_command(merge_parquet_files)
-cli.add_command(analyze_parquet_files)
-cli.add_command(run_file_download_stat)
+main.add_command(get_log_files)
+main.add_command(run_log_file_stat)
+main.add_command(process_log_file)
+main.add_command(merge_parquet_files)
+main.add_command(analyze_parquet_files)
+main.add_command(run_file_download_stat)
 
 # =============== Additional Features ===============
 
-cli.add_command(read_parquet_files)
+main.add_command(read_parquet_files)
 
 if __name__ == "__main__":
-    cli()
+    main()

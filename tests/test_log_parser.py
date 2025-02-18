@@ -13,7 +13,7 @@ class TestLogParser(unittest.TestCase):
         with open(yaml_path, "r") as file:
             cls.config = yaml.safe_load(file)
 
-        # Initialize LogParser with YAML config
+        # Initialize LogFileParser with YAML config
         cls.parser = LogParser("",
             resource_list=cls.config["resource_identifiers"],
             completeness_list=cls.config["completeness"],

@@ -2,7 +2,8 @@ import gzip
 import os
 import sys
 from pathlib import Path
-from log_parser import LogParser
+
+from log_file_parser import LogFileParser
 from parquet_writer import ParquetWriter
 
 
@@ -21,20 +22,6 @@ class FileUtil:
         root_path = Path(root_dir)
         return [str(file) for file in root_path.rglob("*.tsv.gz")]
 
-    # def count_lines_in_gz(self, file_path):
-    #     """
-    #     Count the number of lines in a gzipped file.
-    #     :param file_path: Path to the gzipped file.
-    #     :return: Number of lines.
-    #     """
-    #     line_count = 0
-    #     try:
-    #         with gzip.open(file_path, "rt", encoding="utf-8") as gz_file:
-    #             for _ in gz_file:
-    #                 line_count += 1
-    #     except Exception as e:
-    #         print(f"Error counting lines in {file_path}: {e}")
-    #     return line_count
 
     def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list, public_list: list):
         """
@@ -86,7 +73,7 @@ class FileUtil:
 
             print(f"Parsing file and writing output to {parquet_output_file}")
 
-            lp = LogParser(file_path, resource_list, completeness_list, accession_pattern)
+            lp = LogFileParser(file_path, resource_list, completeness_list, accession_pattern)
             writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
 
             for batch in lp.parse_gzipped_tsv(batch_size):

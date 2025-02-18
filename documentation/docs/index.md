@@ -1,7 +1,22 @@
 # File Download Statistics Workflow Documentation
 
 ## Overview
-This Nextflow workflow facilitates the automated extraction, transformation, and analysis of file download logs, culminating in statistical reporting and database updates. The pipeline sequentially retrieves log files, processes them into Parquet format, consolidates datasets, performs analytical computations, and disseminates the results for further usage.
+
+EBI infrastructure maintains the log files for file downloads for each service running in the EBI infrastructure.
+The purpose of this workflow is to get the statistics around file downloads to help understand the usage of the files and the projects, and helps to make decisions. 
+
+## Log Files
+
+Log files are stored in the EBI infrastructure and are in the format of `.gz` files.
+The log files are stored in the following format:
+
+![log_file_format.png](assets/log_file_format.png)
+
+Log files are originally stored in `lts` and are copied to our `nobackup` storage for processing.
+
+## Workflow
+
+![log_file_parser.png](assets/log_file_parser.png)
 
 ## Parameters
 | Parameter | Description |
