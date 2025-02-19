@@ -141,6 +141,7 @@ process merge_parquet_files {
 process analyze_parquet_files {
 
     label 'process_low'
+//      label 'process_high'
     label 'error_retry_medium'
 
     input:
@@ -168,6 +169,7 @@ process analyze_parquet_files {
 process run_file_download_stat {
 
     label 'process_low'
+//      label 'process_high'
     label 'error_retry_medium'
 
     input:
