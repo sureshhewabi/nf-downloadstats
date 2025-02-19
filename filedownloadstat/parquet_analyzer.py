@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 import dask.dataframe as dd
 from scipy.stats import rankdata
 
@@ -69,8 +70,14 @@ class ParquetAnalyzer:
         # Compute the result
         result = file_counts.compute()
 
-        # Save to JSON
-        result.to_json(project_level_yearly_download_counts, orient="records", lines=False)
+        # Convert to the desired nested JSON structure
+        grouped = result.groupby("accession").apply(lambda x: {
+            "accession": x["accession"].iloc[0],
+            "yearlyDownloads": x[["year", "count"]].to_dict(orient="records")
+        }).tolist()
+
+        # Save to JSON file without indentation
+        pd.DataFrame(grouped).to_json(project_level_yearly_download_counts, orient="records", lines=False)
 
         print(f"{project_level_yearly_download_counts} file saved successfully!")
 

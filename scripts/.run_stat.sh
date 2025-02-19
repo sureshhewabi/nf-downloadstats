@@ -17,4 +17,4 @@ nextflow -log $LOG_FILE run ${PIPELINE_BASE_DIR}main.nf \
               --log_file $LOG_FILE \
               --api_endpoint_file_downloads_per_project $API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT \
               --api_endpoint_file_downloads_per_file $API_ENDPOINT_FILE_DOWNLOADS_PER_FILE \
-              --api_endpoint_header $API_ENDPOINT_HEADER -resume -with-tower
+              --api_endpoint_header "$API_ENDPOINT_HEADER" -resume -with-tower
