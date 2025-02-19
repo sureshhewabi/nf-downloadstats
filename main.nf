@@ -206,9 +206,27 @@ process update_project_download_counts {
     """
 }
 
+process update_project_yearly_download_counts {
+
+    label 'error_retry'
+
+    input:
+    path project_level_yearly_download_counts // The JSON file to upload
+
+    output:
+    path "upload_response_file_downloads_YEARLY_per_project.txt" // Capture the response from the server
+
+    script:
+    """
+    curl --location --max-time 300 '${params.api_endpoint_file_downloads_per_project}' \
+    --header '${params.api_endpoint_header}' \
+    --form 'files=@\"${project_level_yearly_download_counts}\"' > upload_response_file_downloads_YEARLY_per_project.txt
+    """
+}
+
 process update_file_level_download_counts {
 
-    label 'process_medium_memory'
+//     label 'process_medium_memory'
     label 'error_retry'
 
     input:
@@ -314,7 +332,14 @@ workflow {
         println "Skipping update_project_download_counts because disable_db_update=true"
     }
 
-    // Step 6: Update project level downloads in MongoDB
+    // Step 6: Update project level YEARLY downloads in MongoDB
+     if (!params.disable_db_update) {
+        update_project_yearly_download_counts(analyze_parquet_files.out.project_level_yearly_download_counts)
+     } else {
+        println "Skipping update_project_yearly_download_counts because disable_db_update=true"
+    }
+
+    // Step 7: Update project level downloads in MongoDB
     if (!params.disable_db_update) {
         update_file_level_download_counts(analyze_parquet_files.out.file_level_download_counts)
     } else {
