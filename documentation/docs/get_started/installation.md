@@ -1,19 +1,19 @@
-### Run in your Local Environment
+### A. Run in your Local Environment
 
-1. **Download/clone the project*
-	Download/clone the project from [file-download-stat repository](https://github.com/PRIDE-Archive/file-download-stat)
+1. **Download the project**<br>
+    Download/clone the project from [file-download-stat repository](https://github.com/PRIDE-Archive/file-download-stat)
 2. **Run `make install` Command**  
    Go to the location where you installed the pipeline and run the following command to set up the environment and install dependencies:
    ```bash
    make install
-    ```
+   ```
 3. **Run the Pipeline**
    After the installation is complete, run the pipeline with:
    ```bash
    scripts/run_stat.sh local 
-    ```
+   ```
 
-### Run in EBI Infrastructure
+### B. Run in EBI Infrastructure
 
 1. **Fork the Repository**  
    Fork the [file-download-stat repository](https://github.com/PRIDE-Archive/file-download-stat) to your GitHub account.
@@ -32,15 +32,15 @@
 
 6. **Run `make install` Command**  
    Go to the location where you installed the pipeline and run the following command to set up the environment and install dependencies:
-   ```bash
+   ``` bash
    make install
-    ```
+   ```
    
 7. **Run the Pipeline**
    After the installation is complete, run the pipeline with:
-   ```bash
+   ``` bash
    ./run_download_stat.sh
-    ```
-   
+   ```
+
 8. **Optionally, Set Up Seqera Environment**
    If needed, you can optionally set up the Seqera environment to monitor the running pipelines. Please contact us for more information.
