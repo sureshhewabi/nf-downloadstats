@@ -17,5 +17,5 @@ dependencies:
       - dask>=2023.1.0
       - plotly
       - mkdocs-material
-      - yaml
+      - pyyaml
       - scipy

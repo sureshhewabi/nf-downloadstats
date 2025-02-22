@@ -1,26 +1,45 @@
 # ------------ Define variables ------------
 
-#Conda environment name
+# Conda environment name
 CONDA_ENV_NAME=file_download_stat
 
-# Directory where logs will be copied to from the original location, this should be accessible by the 'standard' queue in SLURM
-LOGS_DESTINATION_ROOT=$LOGS_DESTINATION_ROOT
+# Load variables from .env file if it exists
+-include .env
+export $(shell sed 's/=.*//' .env 2>/dev/null)
 
-# Profile used to define the params
+# ------------ setting up variables ------------
 PARAMS_FILE=params/$(RESOURCE_NAME)-$(PROFILE)-params.yml
+CONDA_ENV_LIST := $(shell conda env list | grep $(CONDA_ENV_NAME))
 
-# working directory of the nextflow pipeline
-WORKING_DIR=$WORKING_DIR
-
-CONDA_ENV_LIST := $(shell conda env list | grep $(CONDA_ENV_NAME));
-
-.PHONY: all check_conda check_env create_env check_packages check_log_copy_path check_params check_mamba check_working_dir install
+# ------------------------------------------------
+.PHONY: all check_conda check_env create_env check_packages check_log_copy_path check_params check_mamba check_working_dir install setup clean uninstall
 
 all: check_conda check_env check_packages check_log_copy_path check_params check_working_dir
 
-install: check_conda check_env check_packages check_log_copy_path check_params check_working_dir
+install: setup check_conda check_env check_packages check_log_copy_path check_params check_working_dir
 	@echo "✅ Installation completed successfully!"
 
+setup:
+	@echo "🔍 Checking if required variables are set..."
+	@bash -c ' \
+		if [ -z "$(LOGS_DESTINATION_ROOT)" ]; then \
+			read -p "Enter LOGS_DESTINATION_ROOT: " LOGS_DESTINATION_ROOT; \
+			echo "LOGS_DESTINATION_ROOT=$$LOGS_DESTINATION_ROOT" >> .env; \
+		fi; \
+		if [ -z "$(RESOURCE_NAME)" ]; then \
+			read -p "Enter RESOURCE_NAME (pride, ena, etc): " RESOURCE_NAME; \
+			echo "RESOURCE_NAME=$$RESOURCE_NAME" >> .env; \
+		fi; \
+		if [ -z "$(PROFILE)" ]; then \
+			read -p "Enter PROFILE (eg: local, ebislurm): " PROFILE; \
+			echo "PROFILE=$$PROFILE" >> .env; \
+		fi; \
+		if [ -z "$(WORKING_DIR)" ]; then \
+			read -p "Enter WORKING_DIR: " WORKING_DIR; \
+			echo "WORKING_DIR=$$WORKING_DIR" >> .env; \
+		fi; \
+		echo "✅ Setup completed. Variables saved in .env."; \
+	'
 check_conda:
 	@echo "🔍 Checking Conda installation..."
 	@if ! command -v conda > /dev/null 2>&1; then \
@@ -67,10 +86,8 @@ create_env:
 		echo "⏩ Skipping Conda environment setup."; \
 	fi
 
-
-
 check_packages:
-	@echo "⚠️ TODO: Need to implement!!!."
+	@echo "⚠️ TODO: Conda packages check: Upcoming feature!!!."
 
 check_log_copy_path:
 	@echo "🔍 Checking LOGS_DESTINATION_ROOT: $(LOGS_DESTINATION_ROOT)"
