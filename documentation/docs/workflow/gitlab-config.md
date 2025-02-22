@@ -1,4 +1,4 @@
-# GitLab CI/CD Required Variables
+# GitLab CI/CD
 
 This document outlines the **environment variables** that must be provided in **GitLab CI/CD** for the pipeline to function correctly. These variables should be configured in the **GitLab repository settings** under **Settings > CI/CD > Variables**.
 

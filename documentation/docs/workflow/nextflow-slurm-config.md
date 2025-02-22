@@ -1,5 +1,4 @@
-# Nextflow SLURM Configuration Documentation
-
+# Nextflow SLURM
 This document outlines the SLURM resource configurations and process-specific settings used in **Nextflow**. It explains CPU, memory, time allocations, and error handling strategies for different process types.
 
 ---
