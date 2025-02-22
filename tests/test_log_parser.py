@@ -1,7 +1,7 @@
 import os
 import unittest
 from datetime import datetime
-from filedownloadstat.log_parser import LogParser
+from filedownloadstat.log_file_parser import LogFileParser
 import yaml
 
 class TestLogParser(unittest.TestCase):
@@ -14,7 +14,7 @@ class TestLogParser(unittest.TestCase):
             cls.config = yaml.safe_load(file)
 
         # Initialize LogFileParser with YAML config
-        cls.parser = LogParser("",
+        cls.parser = LogFileParser("",
             resource_list=cls.config["resource_identifiers"],
             completeness_list=cls.config["completeness"],
             accession_pattern= "^PXD\\d{6}$" #cls.config["accession_pattern"]
