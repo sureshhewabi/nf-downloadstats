@@ -1,7 +1,7 @@
 # ------------ Define variables ------------
 
 #Conda environment name
-ENV_NAME=file_download_stat
+CONDA_ENV_NAME=file_download_stat
 
 # Directory where logs will be copied to from the original location, this should be accessible by the 'standard' queue in SLURM
 LOGS_DESTINATION_ROOT=$LOGS_DESTINATION_ROOT
@@ -12,7 +12,7 @@ PARAMS_FILE=params/$(RESOURCE_NAME)-$(PROFILE)-params.yml
 # working directory of the nextflow pipeline
 WORKING_DIR=$WORKING_DIR
 
-CONDA_ENV_LIST := $(shell conda env list | grep $(ENV_NAME));
+CONDA_ENV_LIST := $(shell conda env list | grep $(CONDA_ENV_NAME));
 
 .PHONY: all check_conda check_env create_env check_packages check_log_copy_path check_params check_mamba check_working_dir install
 
@@ -45,16 +45,16 @@ check_mamba:
 	fi
 
 check_env:
-	@echo "🔍 Checking Conda environment '$(ENV_NAME)'..."
+	@echo "🔍 Checking Conda environment '$(CONDA_ENV_NAME)'..."
 	@if [ -z "$(CONDA_ENV_LIST)" ]; then \
-		read -p "⚠️ Conda environment '$(ENV_NAME)' not found. Install it? (y/n): " CONFIRM; \
+		read -p "⚠️ Conda environment '$(CONDA_ENV_NAME)' not found. Install it? (y/n): " CONFIRM; \
 		if [ "$$CONFIRM" = "y" ]; then \
 			$(MAKE) create_env; \
 		else \
 			echo "⏩ Skipping Conda environment setup."; \
 		fi; \
 	else \
-		echo "✅ Conda environment '$(ENV_NAME)' already exists."; \
+		echo "✅ Conda environment '$(CONDA_ENV_NAME)' already exists."; \
 	fi
 
 create_env:
@@ -101,7 +101,7 @@ check_params:
 check_working_dir:
 	@echo "🔍 Checking working directory: $(WORKING_DIR)"
 	@if [ ! -d "$(WORKING_DIR)" ]; then \
-		read -p "⚠️ LOGS_DESTINATION_ROOT '$(WORKING_DIR)' does not exist. Create it? (y/n): " CONFIRM; \
+		read -p "⚠️ WORKING_DIR '$(WORKING_DIR)' does not exist. Create it? (y/n): " CONFIRM; \
 		if [ "$$CONFIRM" = "y" ]; then \
 			mkdir -p $(WORKING_DIR); \
 			echo "✅ Created working directory: $(WORKING_DIR)"; \
@@ -127,12 +127,12 @@ clean:
 
 uninstall:
 	@echo "❌ Uninstalling everything..."
-	@read -p "⚠️ Do you want to remove conda environment'$(ENV_NAME)'? (y/n): " CONFIRM; \
+	@read -p "⚠️ Do you want to remove conda environment'$(CONDA_ENV_NAME)'? (y/n): " CONFIRM; \
 	if [ "$$CONFIRM" = "y" ]; then \
-		conda remove -n $(ENV_NAME) --all -y; \
-		echo "✅ ENV_NAME deleted: $(ENV_NAME)"; \
+		conda remove -n $(CONDA_ENV_NAME) --all -y; \
+		echo "✅ CONDA_ENV_NAME deleted: $(CONDA_ENV_NAME)"; \
 	else \
-		echo "⏩ Skipping ENV_NAME deletion."; \
+		echo "⏩ Skipping CONDA_ENV_NAME deletion."; \
 	fi;
 	@read -p "⚠️ Do you want to remove '$(WORKING_DIR)'? (y/n): " CONFIRM; \
 	if [ "$$CONFIRM" = "y" ]; then \
