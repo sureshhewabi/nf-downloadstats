@@ -63,7 +63,7 @@ process get_log_files {
 
     script:
     """
-    python3 ${workflow.projectDir}/filedownloadstat/filedownloadstat.py get_log_files \
+    python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  get_log_files \
         --root_dir $root_dir \
         --output "file_list.txt" \
         --protocols "${params.protocols.join(',')}" \
@@ -83,7 +83,7 @@ process run_log_file_stat{
 
     script:
     """
-    python3 ${workflow.projectDir}/filedownloadstat/filedownloadstat.py run_log_file_stat \
+    python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  run_log_file_stat \
         --file ${file_paths} \
         --output "log_file_statistics.html"
     """
@@ -105,7 +105,7 @@ process process_log_file {
     """
     # Extract a unique identifier from the log file name
     filename=\$(basename ${file_path} .log.tsv.gz)
-    python3 ${workflow.projectDir}/filedownloadstat/filedownloadstat.py process_log_file \
+    python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  process_log_file \
         -f ${file_path} \
         -o "\${filename}.parquet" \
         -r "${params.resource_identifiers.join(",")}" \
@@ -132,7 +132,7 @@ process merge_parquet_files {
     # Write the file paths to a temporary file, because otherwise Argument list(file list) will be too long
     echo "${all_parquet_files.join('\n')}" > all_parquet_files_list.txt
 
-    python3 ${workflow.projectDir}/filedownloadstat/filedownloadstat.py merge_parquet_files \
+    python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  merge_parquet_files \
         --input_dir all_parquet_files_list.txt \
         --output_parquet "output_parquet"
     """
@@ -141,6 +141,7 @@ process merge_parquet_files {
 process analyze_parquet_files {
 
     label 'process_low'
+//      label 'process_high'
     label 'error_retry_medium'
 
     input:
@@ -155,7 +156,7 @@ process analyze_parquet_files {
 
     script:
     """
-    python3 ${workflow.projectDir}/filedownloadstat/filedownloadstat.py analyze_parquet_files \
+    python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  analyze_parquet_files \
         --output_parquet ${output_parquet} \
         --project_level_download_counts project_level_download_counts.json \
         --file_level_download_counts file_level_download_counts.json \
@@ -168,6 +169,7 @@ process analyze_parquet_files {
 process run_file_download_stat {
 
     label 'process_low'
+//      label 'process_high'
     label 'error_retry_medium'
 
     input:
@@ -178,7 +180,7 @@ process run_file_download_stat {
 
     script:
     """
-    python3 ${workflow.projectDir}/filedownloadstat/filedownloadstat.py run_file_download_stat \
+    python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  run_file_download_stat \
         --file ${all_data} \
         --output "file_download_stat.html" \
         --report_template ${params.report_template} \

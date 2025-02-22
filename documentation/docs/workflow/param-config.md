@@ -1,4 +1,4 @@
-# Configuration Parameters
+# Parameters
 
 ## **Log File Parsing**
 

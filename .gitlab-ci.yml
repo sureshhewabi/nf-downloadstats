@@ -11,22 +11,23 @@ deploy:
     - DEPLOY_SERVERS_ARRAY=(`echo $DEPLOY_SERVER | tr ',' ' '`)
     - for i in "${DEPLOY_SERVERS_ARRAY[@]}"; do ssh-keyscan $i >> ~/.ssh/known_hosts; chmod 600 ~/.ssh/*; done
   script:
-    - envsubst < .params.config > params.config
-    - envsubst '${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR},${API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT},${API_ENDPOINT_FILE_DOWNLOADS_PER_FILE},${API_ENDPOINT_HEADER}' < scripts/.run_stat.sh > scripts/run_stat.sh
-    - envsubst '${CONDA_INIT},${LOGS_SOURCE_ROOT},${LOGS_DESTINATION_ROOT}' < .run_file_download_stats.sh > run_file_download_stats.sh
     - DEPLOY_DIR=$(date +"%Y%m%d_%H%M%S")
     - mkdir $DEPLOY_DIR
-    - cp -r scripts $DEPLOY_DIR/
-    - cp -r *.config $DEPLOY_DIR/
-    - cp -r *.yml $DEPLOY_DIR/
-    - cp -r *.nf $DEPLOY_DIR/
-    - cp -r *.sh $DEPLOY_DIR/
-    - cp -r filedownloadstat $DEPLOY_DIR/
-    - cp -r conf $DEPLOY_DIR/
-    - cp -r params $DEPLOY_DIR/
-    - cp -r template $DEPLOY_DIR/
-    - ls $DEPLOY_DIR
+
+    # Substitute environment variables
+#    - envsubst < .params.config > params.config
+#    - envsubst '${PIPELINE_BASE_DIR},${LOG_FOLDER},${DATA_ROOT_DIR},${API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT},${API_ENDPOINT_FILE_DOWNLOADS_PER_FILE},${API_ENDPOINT_HEADER}' < scripts/.run_stat.sh > scripts/run_stat.sh
+#    - envsubst '${CONDA_INIT},${LOGS_SOURCE_ROOT},${LOGS_DESTINATION_ROOT}' < .run_file_download_stats.sh > run_file_download_stats.sh
+    - for file in .params.config .run_file_download_stats.sh; do envsubst < "$file" > "${file#.}"; done
+    - for file in .run_stat.sh; do envsubst < "scripts/$file" > "scripts/${file#.}"; done
+
+    # Move all necessary files to the deployment directory
+    - rsync -a scripts *.config *.yml *.nf *.sh filedownloadstat conf params template "$DEPLOY_DIR/"
+
+    # Secure permissions
     - cd $DEPLOY_DIR && chmod 755 *.sh scripts/* && cd ..
+
+    # Deploy to HPC
     - ssh $SERVER_USER@$DEPLOY_SERVER "bash && mkdir -p $DEPLOY_PATH"
     - rsync -a $DEPLOY_DIR $SERVER_USER@$DEPLOY_SERVER:$DEPLOY_PATH/
     - ssh $SERVER_USER@$DEPLOY_SERVER "bash && cd $DEPLOY_PATH && ln -snf $DEPLOY_DIR $SYMLINK"
