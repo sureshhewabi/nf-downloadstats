@@ -15,16 +15,11 @@ This helps to understand the usage of the files and the projects, and helps to m
 
 ## Usage
 
-To Create the Environment:
+# Install everything
+make install
 
-`conda env create -f environment.yml`
+# Clean up
+make clean
 
-To Activate conda :
-
-`conda activate file_download_stat`
-
-## Debugging
-
-Check Nextflow:
-
-`nextflow -version`
+# Uninstall everything
+make uninstall
