@@ -3,6 +3,7 @@
 *.log
 .nextflow.log.*
 *.parquet
+.env
 
 # OS generated files #
 ######################
