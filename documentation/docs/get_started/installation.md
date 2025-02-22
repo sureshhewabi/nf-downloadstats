@@ -5,9 +5,11 @@
 2. **Run `make install` Command**  
    Go to the location where you installed the pipeline and run the following command to set up the environment and install dependencies:
    ```bash
-   make install
+   make setup      # Set up required variables
+   make install    # Run all checks and install dependencies
    ```
-3. **Run the Pipeline**
+3. Copy log files from the EBI server to your local machine. 
+4. **Run the Pipeline**
    After the installation is complete, run the pipeline with:
    ```bash
    scripts/run_stat.sh local 
@@ -33,7 +35,8 @@
 6. **Run `make install` Command**  
    Go to the location where you installed the pipeline and run the following command to set up the environment and install dependencies:
    ``` bash
-   make install
+   make setup      # Set up required variables
+   make install    # Run all checks and install dependencies
    ```
    
 7. **Run the Pipeline**
