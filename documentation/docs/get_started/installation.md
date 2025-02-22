@@ -1,52 +1,46 @@
+### Run in your Local Environment
 
+1. **Download/clone the project*
+	Download/clone the project from [file-download-stat repository](https://github.com/PRIDE-Archive/file-download-stat)
+2. **Run `make install` Command**  
+   Go to the location where you installed the pipeline and run the following command to set up the environment and install dependencies:
+   ```bash
+   make install
+    ```
+3. **Run the Pipeline**
+   After the installation is complete, run the pipeline with:
+   ```bash
+   scripts/run_stat.sh local 
+    ```
 
-## **Parameters**
-| Parameter | Description |
-|-----------|-------------|
-| `params.root_dir` | The root directory containing log files |
-| `params.output_file` | Designated output filename for the Parquet dataset |
-| `params.log_file` | Path to the primary log file |
-| `params.api_endpoint_file_download_per_project` | API endpoint for project-level file download statistics |
-| `params.protocols` | Protocols considered in the processing pipeline |
+### Run in EBI Infrastructure
 
-Additional parameters relevant for debugging and report generation:
-- `params.resource_identifiers`
-- `params.completeness`
-- `params.public_private`
-- `params.report_template`
-- `params.log_file_batch_size`
-- `params.resource_base_url`
-- `params.report_copy_filepath`
-- `params.skipped_years`
-- `params.accession_pattern`
-- `params.chunk_size`
-- `params.disable_db_update`
-- `params.api_endpoint_file_downloads_per_file`
+1. **Fork the Repository**  
+   Fork the [file-download-stat repository](https://github.com/PRIDE-Archive/file-download-stat) to your GitHub account.
 
----
+2. **Set Up EBI GitLab Repo**  
+   Set up a repository in GitLab to mirror the repository you forked from GitHub.
 
-## **Debugging and Error Handling**
-- The workflow captures session metadata and logs critical information at runtime.
-- Intermediate outputs are generated to facilitate validation and troubleshooting.
-- Fault tolerance is enhanced via retry mechanisms using `error_retry_max` and `error_retry_medium` labels.
+3. **Customize `params.config` File**  
+   In the `params` folder, customize or add your `<resource_name>-<environment>-params.config` file to configure your pipeline parameters.
 
----
+4. **Set Up CI/CD Pipeline and Variables**  
+   Set up the CI/CD pipeline in GitLab. Be sure to configure any necessary environment variables that are required for your pipeline.
 
-## **Additional Considerations**
-- The workflow is optimized for high-throughput log processing and large-scale statistical analysis.
-- Database updates can be toggled using the `params.disable_db_update` flag.
-- Input log files may be in compressed (`.gz`) or uncompressed (`.tsv`) format.
+5. **Deploy the Pipeline from GitLab**  
+   Deploy the pipeline from GitLab, making sure that the pipeline correctly uses your configuration.
 
----
-
-## **Execution Instructions**
-To initiate the workflow, execute:
-```bash
-nextflow run main.nf --root_dir /path/to/logs --output_file parsed_data.parquet
-```
-
-For debugging and performance monitoring, enable logging:
-```bash
-nextflow run main.nf -with-report report.html -with-trace trace.txt
-```
-
+6. **Run `make install` Command**  
+   Go to the location where you installed the pipeline and run the following command to set up the environment and install dependencies:
+   ```bash
+   make install
+    ```
+   
+7. **Run the Pipeline**
+   After the installation is complete, run the pipeline with:
+   ```bash
+   ./run_download_stat.sh
+    ```
+   
+8. **Optionally, Set Up Seqera Environment**
+   If needed, you can optionally set up the Seqera environment to monitor the running pipelines. Please contact us for more information.
