@@ -28,6 +28,7 @@ FOR DEVELOPERS USE
 SessionId           : $workflow.sessionId
 LaunchDir           : $workflow.launchDir
 projectDir          : $workflow.projectDir
+dataDir             : ${params.root_dir}
 workDir             : $workflow.workDir
 RunName             : $workflow.runName
 Profile             : $workflow.profile

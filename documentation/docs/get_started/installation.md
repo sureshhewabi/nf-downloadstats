@@ -14,7 +14,7 @@
       - bash (since Makefile runs Bash scripts)
       - git (recommended for version control)
 
-## B. 📖 How to Install & Run - Local Environment
+## B. 📖 How to Install & Run from Local Environment
 
 **1️⃣ Clone the Repository**
    Clone the repository and go to the location where you installed the pipeline. 
@@ -44,10 +44,10 @@
 **4️⃣ Run the Pipeline**
    After the installation is complete, run the pipeline with:
    ```bash
-   scripts/run_stat.sh local 
+   scripts/run_stat_local.sh local 
    ```
 
-## C. 📖How to Install & Run - EBI Infrastructure
+## C. 📖How to Install & Run from EBI Infrastructure
 
 **1️⃣ Fork the Repository**  
    Fork the [file-download-stat](https://github.com/PRIDE-Archive/file-download-stat) repository to your GitHub account.
