@@ -13,9 +13,9 @@ nav:
       - report/report-interpretation.md
       - report/report-customization.md
   - Miscellaneous:
-      - mics/log-files.md
-      - mics/workflow.md
-      - mics/limitations.md
+      - misc/log-files.md
+      - misc/workflow.md
+      - misc/limitations.md
 theme:
   name: material
   features:
