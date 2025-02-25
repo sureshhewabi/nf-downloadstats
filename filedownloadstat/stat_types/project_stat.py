@@ -94,8 +94,8 @@ class ProjectStat:
         df["accession_url"] = df["accession"].apply(
             lambda x: f'<a href="{baseurl}{x}" target="_blank">{x}</a>')
 
-        top_n_options = [5, 10, 15]
-
+        # top_n_options = [5, 10, 15]
+        #
         # Create initial figure (default to Top 10)
         initial_top_n = 10
         filtered_df = df.nlargest(initial_top_n, "download_count")
@@ -111,27 +111,27 @@ class ProjectStat:
         )
 
         # Add dropdown menu for selecting Top N projects
-        dropdown_buttons = [
-            {
-                "label": f"Top {n}",
-                "method": "update",
-                "args": [
-                    {"x": [df.nlargest(n, "download_count")["download_count"]],
-                     "y": [df.nlargest(n, "download_count")["accession_url"]],
-                     "text": [df.nlargest(n, "download_count")["download_count"]]
-                     },
-                    {"title": f"Top {n} Downloaded Projects"}
-                ]
-            }
-            for n in top_n_options
-        ]
-
-        fig.update_layout(
-            updatemenus=[{
-                "buttons": dropdown_buttons,
-                "direction": "down",
-                "showactive": True,
-            }]
-        )
+        # dropdown_buttons = [
+        #     {
+        #         "label": f"Top {n}",
+        #         "method": "update",
+        #         "args": [
+        #             {"x": [df.nlargest(n, "download_count")["download_count"]],
+        #              "y": [df.nlargest(n, "download_count")["accession_url"]],
+        #              "text": [df.nlargest(n, "download_count")["download_count"]]
+        #              },
+        #             {"title": f"Top {n} Downloaded Projects"}
+        #         ]
+        #     }
+        #     for n in top_n_options
+        # ]
+        #
+        # fig.update_layout(
+        #     updatemenus=[{
+        #         "buttons": dropdown_buttons,
+        #         "direction": "down",
+        #         "showactive": True,
+        #     }]
+        # )
 
         fig.write_html('top_downloaded_projects.html')
