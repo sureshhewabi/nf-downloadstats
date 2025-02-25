@@ -57,9 +57,11 @@
 
 **3️⃣ Customize `params.config` File**  
    In the `params` folder, customize or add your `<resource_name>-<environment>-params.config` file to configure your pipeline parameters.
+   For more details, visit [parameters](../../workflow/param-config).
 
 **4️⃣ Set Up CI/CD Pipeline and Variables**  
    Set up the CI/CD pipeline in GitLab. Be sure to configure any necessary environment variables that are required for your pipeline.
+   For more details, visit [GitLab CI/CD variables](../../workflow/gitlab-config).
 
 **5️⃣ Deploy the Pipeline from GitLab**  
    Deploy the pipeline from GitLab, making sure that the pipeline correctly uses your configuration.
