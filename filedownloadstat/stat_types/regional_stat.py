@@ -35,7 +35,6 @@ class RegionalStat:
 
         fig.update_layout(
             geo=dict(
-                showframe=False,
                 showcoastlines=True,
                 projection_type='natural earth'
             ),
@@ -55,4 +54,5 @@ class RegionalStat:
                 )
             ]
         )
+        fig.update_layout(width=1200, height=800)
         fig.write_html("downloads_by_country.html")

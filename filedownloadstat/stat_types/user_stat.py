@@ -36,5 +36,12 @@ class UserStat:
             size_max=50,
             color_discrete_sequence=px.colors.qualitative.Set3
         )
+        fig.update_layout(
+            geo=dict(
+                showcoastlines=True,
+                projection_type='natural earth'
+            ),
+            width=1200,
+            height=800)
         fig.write_html("users_by_country.html")
 
