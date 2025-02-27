@@ -1,0 +1,29 @@
+
+############# Log File Parsing #############
+
+protocols:
+  - fasp-aspera
+  - gridftp-globus
+  - http
+  - ftp
+public_private:
+  - public
+resource_identifiers:
+  - /biostudies/fire/
+  - /biostudies/nfs/
+accession_pattern: '^S-BIAD\\d{}'
+completeness:
+  - complete
+############# Statistics Reports #############
+
+report_template: "biostudies_report.html"
+skipped_years:
+  - 2020
+  - 2025
+resource_base_url: 'https://www.ebi.ac.uk/bioimage-archive/'
+report_copy_filepath:
+
+############# Push to a Database(e.g MongoDB) #############
+disable_db_update: false
+log_file_batch_size: 1000
+chunk_size: 100000
