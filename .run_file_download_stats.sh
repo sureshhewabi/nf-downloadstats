@@ -53,8 +53,6 @@ echo "${JOB1_NAME} job ID: ${JOB_ID}"
 
 ${CONDA_INIT}
 conda activate file_download_stat
-RESOURCE=${RESOURCE}
-PROFILE=${PROFILE}
 
 #### RUN it on the cluster #####
 sbatch -t 3-0 \

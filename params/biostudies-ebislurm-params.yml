@@ -24,6 +24,6 @@ resource_base_url: 'https://www.ebi.ac.uk/bioimage-archive/'
 report_copy_filepath:
 
 ############# Push to a Database(e.g MongoDB) #############
-disable_db_update: false
+disable_db_update: true
 log_file_batch_size: 1000
 chunk_size: 100000
