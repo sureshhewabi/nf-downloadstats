@@ -3,13 +3,14 @@
 ##### VARIABLES
 RUN_NAME="File-Download-Stat-$(date +"%Y")-$(date +"%b")-$((RANDOM % 9000 + 1000))"
 LOG_FILE="${LOG_FOLDER}${RUN_NAME}_nextflow.log"
-PROFILE=$1
-API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT=$2
-API_ENDPOINT_FILE_DOWNLOADS_PER_FILE=$3
-API_ENDPOINT_HEADER=$4
+RESOURCE=$1
+PROFILE=$2
+API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT=$3
+API_ENDPOINT_FILE_DOWNLOADS_PER_FILE=$4
+API_ENDPOINT_HEADER=$5
 
 nextflow -log $LOG_FILE run ${PIPELINE_BASE_DIR}main.nf \
-              -params-file params/pride-$PROFILE-params.yml \
+              -params-file params/$RESOURCE-$PROFILE-params.yml \
               -name $RUN_NAME \
               -profile $PROFILE \
               --nextflow_location "" \
