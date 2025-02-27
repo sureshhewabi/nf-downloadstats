@@ -53,7 +53,8 @@ echo "${JOB1_NAME} job ID: ${JOB_ID}"
 
 ${CONDA_INIT}
 conda activate file_download_stat
-PROFILE="ebislurm"
+RESOURCE=${RESOURCE}
+PROFILE=${PROFILE}
 
 #### RUN it on the cluster #####
 sbatch -t 3-0 \
@@ -63,4 +64,4 @@ sbatch -t 3-0 \
       --mail-user=${JOB_EMAIL} \
       --job-name=${JOB2_NAME} \
       --dependency=afterok:${JOB_ID} \
-      ./scripts/run_stat.sh ${PROFILE}
+      ./scripts/run_stat.sh ${RESOURCE} ${PROFILE}
