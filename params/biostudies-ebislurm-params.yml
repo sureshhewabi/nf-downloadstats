@@ -12,6 +12,7 @@ resource_identifiers:
   - /biostudies/fire/
   - /biostudies/nfs/
 accession_pattern: '^S-BIAD\\d{}'
+#/biostudies/fire/E-MTAB-/980/E-MTAB-1980/Files/ccRCC-88-tumor_expression.txt
 completeness:
   - complete
 ############# Statistics Reports #############
