@@ -89,8 +89,9 @@ def get_log_files(root_dir: str, output: str, protocols: str, public: str):
 def process_log_file(tsvfilepath, output_parquet, resource: str, complete: str, batch: int, accession_pattern: str):
     resource_list = resource.split(",")
     completeness_list = complete.split(",")
+    accession_pattern_list = accession_pattern.split(",")
     fileutil = FileUtil()
-    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch, accession_pattern)
+    fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch, accession_pattern_list)
 
 
 @click.command("run_log_file_stat",

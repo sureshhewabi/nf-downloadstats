@@ -112,7 +112,7 @@ process process_log_file {
         -r "${params.resource_identifiers.join(",")}" \
         -c "${params.completeness.join(",")}" \
         -b ${params.log_file_batch_size} \
-        -a ${params.accession_pattern} \
+        -a ${params.accession_pattern.join(",")} \
         > process_log_file.log 2>&1
     """
 }
