@@ -16,7 +16,7 @@ API_ENDPOINT_HEADER=""
 PROFILE=$1
 conda activate file_download_stat
 nextflow -log $LOG_FILE run ${PIPELINE_BASE_DIR}main.nf \
-              -params-file params/pride-$PROFILE-params.yml \
+              -params-file params/$RESOURCE_NAME-$PROFILE-params.yml \
               -name $RUN_NAME \
               -profile $PROFILE \
               --root_dir $DATA_ROOT_DIR \

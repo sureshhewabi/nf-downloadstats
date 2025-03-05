@@ -63,7 +63,7 @@ class FileUtil:
         return file_paths_list
 
     def process_log_file(self, file_path: str, parquet_output_file: str, resource_list: list, completeness_list: list,
-                         batch_size: int, accession_pattern: str):
+                         batch_size: int, accession_pattern_list: list):
         data_written = False
         try:
             print(f"Parsing log file started: {file_path}")
@@ -73,7 +73,7 @@ class FileUtil:
 
             print(f"Parsing file and writing output to {parquet_output_file}")
 
-            lp = LogFileParser(file_path, resource_list, completeness_list, accession_pattern)
+            lp = LogFileParser(file_path, resource_list, completeness_list, accession_pattern_list)
             writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
 
             for batch in lp.parse_gzipped_tsv(batch_size):

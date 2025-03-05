@@ -12,8 +12,8 @@ resource_identifiers:
   - /biostudies/fire/
   - /biostudies/nfs/
 accession_pattern:
-  - 'S-BIAD\\d+'  # Example: '/biostudies/fire/S-BIAD/199/S-BIAD1199/Files/Endometrial_Images/IC-EN-01425-01.geojson'
-  - 'E-MTAB-\\d+' # Example: '/biostudies/fire/E-MTAB-/813/E-MTAB-6813/Files/5431sTS.Macaque.Liver.1dpb.Male.sorted.bam'
+  - 'S-BIAD\\d+'  # Example: 'S-BIAD1199'
+  - 'E-MTAB-\\d+' # Example: 'E-MTAB-6813'
 completeness:
   - complete
 ############# Statistics Reports #############

@@ -14,11 +14,11 @@ class LogFileParser:
 
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, file_path, resource_list, completeness_list, accession_pattern: str):
+    def __init__(self, file_path, resource_list, completeness_list, accession_pattern_list):
         self.file_path = file_path
         self.RESOURCE_IDENTIFIERS = resource_list
         self.completeness = {c.lower().strip() for c in completeness_list}
-        self.accession_pattern = accession_pattern
+        self.accession_pattern_list = accession_pattern_list
 
     def parse_gzipped_tsv(self, batch_size: int ):
         """
@@ -53,19 +53,45 @@ class LogFileParser:
         :return: Boolean indicating if the row is relevant
         """
         if  '/' in row[3]:
-            accession_field = row[3].strip().split('/')[-2]
-            accession_regex = re.compile(self.accession_pattern)
 
-            return (
-                    row[6].lower().strip() in self.completeness and  # complete and/or partial download
-                    any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS) and
-                    bool(accession_regex.match(accession_field)) and  # should follow accession patterns
-                    row[3].split('/')[-1] is not None and # filename cannot be null
-                    row[3].split('/')[-1] != "" # filename cannot be null
-            )
+            if any(row[3].startswith(identifier) for identifier in self.RESOURCE_IDENTIFIERS):
+                accession_field = self.get_accession(row[3])
+                if accession_field is not None:
+                    if row[3].split('/')[-1] is not None and row[3].split('/')[-1] != "":    # filename cannot be null
+                        if  row[6].lower().strip() in self.completeness:
+                            return True # all condition matched
+                    else:
+                        return False
+                else:
+                    return False
+
+            else:
+                return False
         else:
-            # print(f"No file path found in "+ str(row))
             return False
+
+    def get_accession(self, path):
+        """
+        Searches for an accession number in the given path.
+
+        Args:
+            path (str): The file path to check.
+
+        Returns:
+            str or None: The matched accession number as a string, or None if no match is found.
+        """
+        try:
+            for pattern in self.accession_pattern_list:
+                corrected_pattern = re.sub(r"\\\\", r"\\", pattern)  # Fix escaping issues
+                match = re.search(corrected_pattern, path)
+                if match:
+                    return match.group()
+        except re.error as regex_err:
+            print(f"Regex error: {regex_err} | Pattern: {pattern}")
+        except Exception as e:
+            print(f"Unexpected error in get_accession: {e}")
+
+        return None  # No match found or an error occurred
 
     def parse_row(self, row, line_no):
         """
@@ -90,7 +116,7 @@ class LogFileParser:
                         "year": year,
                         "month": month,
                         "user": row[1].strip(),
-                        "accession": row[3].split('/')[-2],  # Project accession of the resource(eg: PXD accession in PRIDE)
+                        "accession": self.get_accession(row[3]),  # Project accession of the resource(eg: PXD accession in PRIDE)
                         "filename": row[3].split('/')[-1],  # Files that are associate to a project(project acceesion)
                         "completed": row[6].lower().strip(),  # Completion Status (e.g., Complete or Incomplete)
                         "country": row[7],  # Country

@@ -12,7 +12,8 @@ resource_identifiers:
   - /pride/data/archive
   - /pride-archive
   - /xfer/public/pride
-accession_pattern: '^PXD\\d{6}$'
+accession_pattern:
+  - 'PXD\\d{6}'
 completeness:
   - complete
 ############# Statistics Reports #############
