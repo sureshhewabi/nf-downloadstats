@@ -135,7 +135,8 @@ process merge_parquet_files {
 
     python3 ${workflow.projectDir}/filedownloadstat/file_download_stat.py  merge_parquet_files \
         --input_dir all_parquet_files_list.txt \
-        --output_parquet "output_parquet"
+        --output_parquet "output_parquet" \
+        --profile $workflow.profile
     """
 }
 
@@ -161,7 +162,8 @@ process analyze_parquet_files {
         --file_level_download_counts file_level_download_counts.json \
         --project_level_yearly_download_counts project_level_yearly_download_counts.json \
         --project_level_top_download_counts project_level_top_download_counts.json \
-        --all_data all_data.json
+        --all_data all_data.json \
+        --profile $workflow.profile
     """
 }
 

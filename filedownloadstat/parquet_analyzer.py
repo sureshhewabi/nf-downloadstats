@@ -4,18 +4,25 @@ import dask.dataframe as dd
 from scipy.stats import rankdata
 from dask.distributed import Client, progress
 from dask_jobqueue import SLURMCluster
+from dask.distributed import LocalCluster
 
-def setup_dask_cluster():
-    """Setup a Dask distributed client for Slurm."""
-    cluster = SLURMCluster(cores=8, memory='32GB', walltime='00:30:00', job_extra_directives=['-o dask_job.%j.%N.out','-e dask_job.%j.%N.error'])
-    cluster.scale(10)  # Scale to 10 nodes (adjust as needed)
+
+def setup_dask_cluster(profile="slurm"):
+    """Setup a Dask distributed client for Slurm or Local based on the profile."""
+    if profile == "ebislurm":
+        cluster = SLURMCluster(cores=8, memory='32GB', walltime='00:30:00',
+                               job_extra_directives=['-o dask_job.%j.%N.out', '-e dask_job.%j.%N.error'])
+        cluster.scale(10)  # Scale to 10 nodes (adjust as needed)
+    else:
+        cluster = LocalCluster()  # Use LocalCluster for the local profile
+
     client = Client(cluster)
-    print(client)
+    print(f"Dask Client connected: {client}")
     return client
 
 class ParquetAnalyzer:
-    def __init__(self):
-        self.client = setup_dask_cluster()
+    def __init__(self, profile="ebislurm"):
+        self.client = setup_dask_cluster(profile)
 
     def analyze_parquet_files(self,
                         output_parquet,
@@ -123,25 +130,6 @@ class ParquetAnalyzer:
 
         return all_parquet_files
 
-    # def merge_parquet_files(self, input_files, output_parquet):
-    #     """
-    #     Reads multiple Parquet files, merges them in a memory-efficient way, and saves them.
-    #     """
-    #     # Get all valid Parquet files
-    #     all_files = self.get_all_parquet_files(input_files)
-    #     if not all_files:
-    #         print("No valid Parquet files found. Exiting.")
-    #         return
-    #
-    #     print(f"Loading {len(all_files)} Parquet files...")
-    #
-    #     # Read all Parquet files into a Dask DataFrame (Lazy loading)
-    #     ddf = dd.read_parquet(all_files, engine="pyarrow")
-    #
-    #     # Write to a partitioned Parquet dataset (memory-efficient)
-    #     ddf.to_parquet(output_parquet, engine="pyarrow", write_index=False, overwrite=True)
-    #
-    #     print(f"Merged Parquet dataset saved at: {output_parquet}")
 
     def merge_parquet_files(self, input_files, output_parquet):
         all_files = self.get_all_parquet_files(input_files)
