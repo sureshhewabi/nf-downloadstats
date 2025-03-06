@@ -141,7 +141,7 @@ process merge_parquet_files {
 
 process analyze_parquet_files {
 
-    label 'error_retry_medium'
+    label 'error_retry_max'
 
     input:
     val output_parquet
