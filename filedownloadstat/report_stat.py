@@ -3,6 +3,7 @@ from pathlib import Path
 from stat_types import ProjectStat, RegionalStat, TrendsStat, UserStat
 from report_util import Report
 import pandas as pd
+import dask.dataframe as dd
 
 class ReportStat:
 
@@ -78,7 +79,7 @@ class ReportStat:
         # Group by date and method to sum the count of downloads per method per day
         # Group by 'date' and 'method' and count the occurrences of each combination
         daily_data = df.groupby(['date', 'method'], as_index=False).size().rename(columns={'size': 'count'})
-        TrendsStat.download_over_treands(daily_data)
+        TrendsStat.download_over_trends(daily_data)
 
     @staticmethod
     def regional_stats(df: pd.DataFrame):
@@ -91,7 +92,9 @@ class ReportStat:
     def user_stats(df: pd.DataFrame):
         # Calculate unique users per date
         user_data = df.groupby(['date', 'year', 'month'], as_index=False)['user'].nunique()
-        user_data['date'] = pd.to_datetime(user_data['date'], unit='ms')  # Convert date to datetime
+        # user_data['date'] = pd.to_datetime(user_data['date'], unit='ms')  # Convert date to datetime
+        user_data['date'] = pd.to_datetime(user_data['date'], format='%Y-%m-%d')  # Use the correct format
+
         UserStat.unique_users_over_time(user_data)
 
         # Calculate unique users per country
@@ -104,17 +107,19 @@ class ReportStat:
         """
         Run the log file statistics generation and save the visualizations in an HTML output file.
         """
+        print(f"Loading data from Parquet: {file}")
 
-        data = pd.read_json(file)
-        df = pd.DataFrame(data)
-
+        df = dd.read_parquet(file)
+        print(df.head())
+        # df = dd.read_parquet(file, engine="pyarrow")  # Efficient lazy loading
         # Filter out rows where 'year' is in skipped_years_list
         df = df[~df["year"].isin(skipped_years_list)]
+        df_pandas = df.compute()
 
-        ReportStat.project_stat(df, baseurl)
-        ReportStat.trends_stat(df)
-        ReportStat.regional_stats(df)
-        ReportStat.user_stats(df)
+        ReportStat.project_stat(df_pandas, baseurl)
+        ReportStat.trends_stat(df_pandas)
+        ReportStat.regional_stats(df_pandas)
+        ReportStat.user_stats(df_pandas)
 
         template_path = Path(__file__).resolve().parent.parent / "template" / report_template
 

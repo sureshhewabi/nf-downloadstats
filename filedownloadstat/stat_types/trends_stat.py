@@ -4,7 +4,7 @@ import plotly.express as px
 class TrendsStat:
 
     @staticmethod
-    def download_over_treands(daily_data):
+    def download_over_trends(daily_data):
         """
         Understand download trends over days, months, or years.
         """
