@@ -92,8 +92,8 @@ class ReportStat:
     def user_stats(df: pd.DataFrame):
         # Calculate unique users per date
         user_data = df.groupby(['date', 'year', 'month'], as_index=False)['user'].nunique()
-        # user_data['date'] = pd.to_datetime(user_data['date'], unit='ms')  # Convert date to datetime
-        user_data['date'] = pd.to_datetime(user_data['date'], format='%Y-%m-%d')  # Use the correct format
+        user_data['date'] = pd.to_datetime(user_data['date'], unit='ms')  # Convert date to datetime
+        # user_data['date'] = pd.to_datetime(user_data['date'], format='%Y-%m-%d')  # Use the correct format
 
         UserStat.unique_users_over_time(user_data)
 
