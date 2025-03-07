@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##### VARIABLES
-RUN_NAME="nf-downloadstat-$RESOURCE-$(date +"%Y")-$(date +"%b")-$((RANDOM % 9000 + 1000))"
+RUN_NAME="nf-downloadstat-$(echo "$RESOURCE" | tr '[:upper:]' '[:lower:]')-$(date +"%Y")-$(date +"%b" | tr '[:upper:]' '[:lower:]')-$((RANDOM % 9000 + 1000))"
 LOG_FILE="${LOG_FOLDER}${RUN_NAME}_nextflow.log"
 RESOURCE=$1
 PROFILE=$2
