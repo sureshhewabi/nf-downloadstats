@@ -1,31 +1,96 @@
 <!DOCTYPE html>
-  <html>
-    <head>
-      <!--Import Google Icon Font-->
-      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-      <!--Import materialize.css-->
-       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+<html lang="en">
 
-      <!--Let browser know website is optimized for mobile-->
-      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    </head>
-    <body>
-        <div class="container">
-          <div class="center">
-            <h1 class="black center" style="color: white; padding-top: 15px;padding-bottom: 15px;  border-bottom: 4px solid green">BIOSTUDIES File Download Statistics</h1>
-          </div>
-          <div class="content">
-                <h4 style="border-bottom: 1px solid black;border-top: 1px solid black;"> 1. Project Level Statistics </h4>
-                {{project_level_content}}
-                <h4 style="border-bottom: 1px solid black;border-top: 1px solid black;"> 2. Trends Statistics </h4>
-                {{trends_content}}
-                <h4 style="border-bottom: 1px solid black;border-top: 1px solid black;"> 3. Regional Level Statistics </h4>
-                {{maps_content}}
-                <h4 style="border-bottom: 1px solid black;border-top: 1px solid black;"> 4. User Level Statistics </h4>
-                {{user_content}}
-          </div>
+<head>
+    <!-- Import Google Icon Font -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Import materialize.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+    <!-- Let browser know website is optimized for mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .center h1 {
+            color: white;
+            padding: 20px;
+            border-bottom: 4px solid #4caf50;
+            background-color: #333;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        h4 {
+            color: #333;
+            font-size: 1.6rem;
+            font-weight: 600;
+            padding: 10px 0;
+            margin: 20px 0;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+            background-color: #f9f9f9;
+            text-transform: uppercase;
+        }
+
+        .content {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .content h4 {
+            margin-top: 0;
+            font-size: 1.4rem;
+        }
+
+        .content p {
+            line-height: 1.6;
+            font-size: 1.2rem;
+        }
+
+        /* Optional: Improve readability and layout */
+        .container .content {
+            margin-bottom: 30px;
+        }
+
+        .container .content h4:first-child {
+            margin-top: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="center">
+            <h1>BioStudies File Download Statistics</h1>
         </div>
-      <!--JavaScript at end of body for optimized loading-->
-      <script type="text/javascript" src="js/materialize.min.js"></script>
-    </body>
-  </html>
+        <div class="content">
+            <h4>1. Project Level Statistics</h4>
+            <p>{{project_level_content}}</p>
+            <h4>2. Trends Statistics</h4>
+            <p>{{trends_content}}</p>
+            <h4>3. Regional Level Statistics</h4>
+            <p>{{maps_content}}</p>
+            <h4>4. User Level Statistics</h4>
+            <p>{{user_content}}</p>
+        </div>
+    </div>
+
+    <!-- JavaScript at end of body for optimized loading -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</body>
+
+</html>

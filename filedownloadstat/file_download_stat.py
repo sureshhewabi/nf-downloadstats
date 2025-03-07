@@ -143,9 +143,12 @@ def read_parquet_files(file: str):
               "--output_parquet",
               required=True,
               )
-
-def merge_parquet_files(input_dir, output_parquet):
-    stat_parquet = ParquetAnalyzer()
+@click.option("-p",
+              "--profile",
+              required=True,
+              )
+def merge_parquet_files(input_dir, output_parquet, profile):
+    stat_parquet = ParquetAnalyzer(profile)
     result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
 
 
@@ -177,14 +180,19 @@ def merge_parquet_files(input_dir, output_parquet):
               "--all_data",
               required=True,
               )
+@click.option("-p",
+              "--profile",
+              required=True,
+              )
 def analyze_parquet_files(
                     output_parquet,
                     project_level_download_counts,
                     file_level_download_counts,
                     project_level_yearly_download_counts,
                     project_level_top_download_counts,
-                    all_data):
-    stat_parquet = ParquetAnalyzer()
+                    all_data,
+                    profile):
+    stat_parquet = ParquetAnalyzer(profile)
     result = stat_parquet.analyze_parquet_files(
                                           output_parquet,
                                           project_level_download_counts,
