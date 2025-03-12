@@ -1,6 +1,7 @@
 import os
 import click
 
+from dask_manager import DaskManager
 from log_file_analyzer import LogFileAnalyzer
 from log_file_util import FileUtil
 from parquet_analyzer import ParquetAnalyzer
@@ -148,8 +149,12 @@ def read_parquet_files(file: str):
               required=True,
               )
 def merge_parquet_files(input_dir, output_parquet, profile):
-    stat_parquet = ParquetAnalyzer(profile)
-    result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
+    dask_manager = DaskManager(profile=profile, nodes=5, max_jobs=20)
+    stat_parquet = ParquetAnalyzer(dask_manager)
+    try:
+        result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
+    finally:
+        dask_manager.close()  # Ensure the Dask cluster shuts down properly
 
 
 @click.command(
@@ -192,14 +197,19 @@ def analyze_parquet_files(
                     project_level_top_download_counts,
                     all_data,
                     profile):
-    stat_parquet = ParquetAnalyzer(profile)
-    result = stat_parquet.analyze_parquet_files(
-                                          output_parquet,
-                                          project_level_download_counts,
-                                          file_level_download_counts,
-                                          project_level_yearly_download_counts,
-                                          project_level_top_download_counts,
-                                          all_data)
+    # Initialize Dask cluster
+    dask_manager = DaskManager(profile=profile, nodes=5, max_jobs=20)
+    stat_parquet = ParquetAnalyzer(dask_manager)
+    try:
+        result = stat_parquet.analyze_parquet_files(
+                                              output_parquet,
+                                              project_level_download_counts,
+                                              file_level_download_counts,
+                                              project_level_yearly_download_counts,
+                                              project_level_top_download_counts,
+                                              all_data)
+    finally:
+        dask_manager.close()  # Ensure the Dask cluster shuts down properly
     print(result)
 
 
