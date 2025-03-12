@@ -149,7 +149,10 @@ def read_parquet_files(file: str):
               )
 def merge_parquet_files(input_dir, output_parquet, profile):
     stat_parquet = ParquetAnalyzer(profile)
-    result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
+    try:
+        result = stat_parquet.merge_parquet_files(input_dir, output_parquet)
+    finally:
+        stat_parquet.close_cluster()
 
 
 @click.command(
@@ -193,13 +196,16 @@ def analyze_parquet_files(
                     all_data,
                     profile):
     stat_parquet = ParquetAnalyzer(profile)
-    result = stat_parquet.analyze_parquet_files(
-                                          output_parquet,
-                                          project_level_download_counts,
-                                          file_level_download_counts,
-                                          project_level_yearly_download_counts,
-                                          project_level_top_download_counts,
-                                          all_data)
+    try:
+        result = stat_parquet.analyze_parquet_files(
+                                              output_parquet,
+                                              project_level_download_counts,
+                                              file_level_download_counts,
+                                              project_level_yearly_download_counts,
+                                              project_level_top_download_counts,
+                                              all_data)
+    finally:
+        stat_parquet.close_cluster()
     print(result)
 
 
