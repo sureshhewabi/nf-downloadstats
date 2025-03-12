@@ -5,19 +5,31 @@ from scipy.stats import rankdata
 from dask.distributed import Client, progress
 from dask_jobqueue import SLURMCluster
 from dask.distributed import LocalCluster
+import plotly.express as px
+import panel as pn
 
 
 def setup_dask_cluster(profile="slurm"):
     """Setup a Dask distributed client for Slurm or Local based on the profile."""
     if profile == "ebislurm":
-        cluster = SLURMCluster(cores=8, memory='32GB', walltime='00:30:00',
-                               job_extra_directives=['-o dask_job.%j.%N.out', '-e dask_job.%j.%N.error'])
+        cluster = SLURMCluster(cores=8,
+                               memory='32GB',
+                               walltime='01:00:00',
+                               job_extra_directives=['-o dask_job.%j.%N.out', '-e dask_job.%j.%N.error'],
+                               worker_memory="28GB")  # Reserve some memory for overhead
         cluster.scale(10)  # Scale to 10 nodes (adjust as needed)
     else:
         cluster = LocalCluster()  # Use LocalCluster for the local profile
 
-    client = Client(cluster)
+    client = Client(cluster, timeout="1800s")
     print(f"Dask Client connected: {client}")
+
+    # Capture the Dask progress dashboard as an HTML report
+    dashboard_url = client.dashboard_link
+    print(f"Dask Dashboard running at: {dashboard_url}")
+
+    # Optionally, use Panel to create a report
+    pn.panel(client).save("dask_dashboard.html")
     return client
 
 class ParquetAnalyzer:
@@ -25,16 +37,17 @@ class ParquetAnalyzer:
         self.client = setup_dask_cluster(profile)
 
     def analyze_parquet_files(self,
-                        output_parquet,
-                        project_level_download_counts,
-                        file_level_download_counts,
-                        project_level_yearly_download_counts,
-                        project_level_top_download_counts,
-                        all_data):
+                              output_parquet,
+                              project_level_download_counts,
+                              file_level_download_counts,
+                              project_level_yearly_download_counts,
+                              project_level_top_download_counts,
+                              all_data):
 
         # Only load the necessary columns instead of reading the entire Parquet file.
-        ddf = dd.read_parquet(output_parquet, engine="pyarrow", columns=["accession", "filename", "year"], optimize_read=True)
-        ddf = ddf.repartition(npartitions=50)  # Increase partitions to optimize memory usage
+        ddf = dd.read_parquet(output_parquet, engine="pyarrow", columns=["accession", "filename", "year"],
+                              optimize_read=True)
+        ddf = ddf.repartition(npartitions="auto")
         ddf = ddf.persist()  # Distributes work across the cluster and returns a lazy Dask object
         progress(ddf)
 
@@ -97,7 +110,7 @@ class ParquetAnalyzer:
 
     def persist_all_data(self, ddf, all_data):
         ddf = ddf.persist()  # Distributes work across the cluster and returns a lazy Dask object
-        progress(ddf) # Monitor distributed execution
+        progress(ddf)  # Monitor distributed execution
         df = ddf.compute()  # Collects final results
         df.to_json(all_data, orient="records", lines=False)
         print(f"All data saved to {all_data}")
