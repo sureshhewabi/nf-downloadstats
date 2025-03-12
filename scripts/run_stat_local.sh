@@ -6,17 +6,23 @@ set +a  # Stop automatically exporting variables
 
 ##### VARIABLES
 DATA_ROOT_DIR=$LOGS_DESTINATION_ROOT #"/path/to/data/transfer_logs_privacy_ready"
-RUN_NAME="File-Download-Stat-$(date +"%Y")-$(date +"%b")-$((RANDOM % 9000 + 1000))"
-LOG_FILE="${RUN_NAME}_nextflow.log"
 API_BASE_URL=""
 API_ENDPOINT_FILE_DOWNLOADS_PER_PROJECT=""
 API_ENDPOINT_FILE_DOWNLOADS_PER_FILE=""
 API_ENDPOINT_HEADER=""
 
-PROFILE=$1
+
+RESOURCE=$1
+echo "RESOURCE : ${RESOURCE}"
+PROFILE=$2
+echo "PROFILE : ${PROFILE}"
+
+RUN_NAME="nf-downloadstat-$(echo "$RESOURCE" | tr '[:upper:]' '[:lower:]')-$(date +"%Y")-$(date +"%b" | tr '[:upper:]' '[:lower:]')-$((RANDOM % 9000 + 1000))"
+LOG_FILE="${LOG_FOLDER}${RUN_NAME}_nextflow.log"
+
 conda activate file_download_stat
 nextflow -log $LOG_FILE run ${PIPELINE_BASE_DIR}main.nf \
-              -params-file params/$RESOURCE_NAME-$PROFILE-params.yml \
+              -params-file params/$RESOURCE-$PROFILE-params.yml \
               -name $RUN_NAME \
               -profile $PROFILE \
               --root_dir $DATA_ROOT_DIR \

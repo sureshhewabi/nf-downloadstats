@@ -116,6 +116,9 @@ class ReportStat:
         df = df[~df["year"].isin(skipped_years_list)]
         df_pandas = df.compute()
 
+        # Convert 'date' to Pandas datetime format
+        df_pandas['date'] = pd.to_datetime(df_pandas['date'])
+
         ReportStat.project_stat(df_pandas, baseurl)
         ReportStat.trends_stat(df_pandas)
         ReportStat.regional_stats(df_pandas)
