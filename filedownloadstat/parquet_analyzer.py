@@ -12,17 +12,18 @@ import panel as pn
 def setup_dask_cluster(profile="slurm"):
     """Setup a Dask distributed client for Slurm or Local based on the profile."""
     if profile == "ebislurm":
-        cluster = SLURMCluster(cores=8,
-                               memory='32GB',
-                               queue='standard',
-                               walltime='01:00:00',
-                               job_extra_directives=['-o dask_job.%j.%N.out', '-e dask_job.%j.%N.error'])
-        cluster.scale(jobs=10)  # Scale to 10 nodes (adjust as needed)
+        ## Cluster configuration is defined in ~/.config/dask/jobqueue.yaml
+        cluster = SLURMCluster()
+
+        # Scale cluster to 05 nodes
+        nodes = 5
+        cluster.scale(nodes)
+
         cluster.adapt(maximum_jobs=20)
     else:
         cluster = LocalCluster()
 
-    client = Client(cluster, timeout="1800s")
+    client = Client(cluster)
 
     print(f"Dask Dashboard running at: {client.dashboard_link}")
     # Optionally, use Panel to create a report
