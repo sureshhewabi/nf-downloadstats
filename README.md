@@ -87,15 +87,15 @@ flowchart TD;
 ### Run in EBI infastructure
 ```./run_download_stat.sh```
 
-For step-by-step instructions, please refer to the [usage documentation](https://pride-archive.github.io/file-download-stat/get_started/installation/)
+For step-by-step instructions, please refer to the [usage documentation](https://pride-archive.github.io/nf-downloadstats/get_started/installation/)
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [Report](https://pride-archive.github.io/file-download-stat/report/report-interpretation/).
+To see the results of an example test run with a full size dataset refer to the [Report](https://pride-archive.github.io/nf-downloadstats/report/report-interpretation/).
 
 # Additional documentation and tutorial
 
-For more details, please refer to the [Complete documentation](https://pride-archive.github.io/file-download-stat/)
+For more details, please refer to the [Complete documentation](https://pride-archive.github.io/nf-downloadstats/)
 
 # Contributions and Support
 
