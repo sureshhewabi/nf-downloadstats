@@ -6,7 +6,7 @@ from scipy.stats import rankdata
 
 
 class ParquetAnalyzer:
-    def __init__(self, batch_size=100_000):
+    def __init__(self, batch_size=100000):
         """Initialize with a batch size for processing."""
         self.batch_size = int(batch_size)  # Number of rows to process at a time
 
@@ -25,7 +25,7 @@ class ParquetAnalyzer:
             df = batch.to_pandas()
 
             # Aggregate project-level counts
-            project_counts.append(df.groupby("accession")["filename"].count().reset_index())
+            project_counts.append(df.groupby("accession")["filename"].count().reset_index(name="count"))
 
             # Aggregate file-level counts
             file_counts.append(df.groupby(["accession", "filename"]).size().reset_index(name="count"))
@@ -45,8 +45,8 @@ class ParquetAnalyzer:
         self.persist_all_data(output_parquet, all_data)
 
     def persist_project_level_download_counts(self, df, output_file):
-        df["percentile"] = (rankdata(df["filename"], method="average") / len(df) * 100).astype(int)
-        df.sort_values(by="filename", ascending=False).to_json(output_file, orient="records", lines=False)
+        df["percentile"] = (rankdata(df["count"], method="average") / len(df) * 100).astype(int)
+        df.sort_values(by="count", ascending=False).to_json(output_file, orient="records", lines=False)
         print(f"{output_file} file saved successfully!")
 
     def persist_file_level_download_counts(self, df, output_file):
