@@ -54,11 +54,21 @@ class ParquetAnalyzer:
         print(f"{output_file} file saved successfully!")
 
     def persist_project_level_yearly_download_counts(self, df, output_file):
-        grouped = df.groupby("accession").apply(lambda x: {
-            "accession": x["accession"].iloc[0],
-            "yearlyDownloads": x[["year", "count"]].to_dict(orient="records")
-        }).tolist()
-        pd.DataFrame(grouped).to_json(output_file, orient="records", lines=False)
+        # Group by accession and year and sum the counts
+        grouped_df = df.groupby(["accession", "year"])["count"].sum().reset_index()
+
+        # Nest yearly counts under each accession
+        nested = (
+            grouped_df
+            .groupby("accession")
+            .apply(lambda x: {
+                "accession": x["accession"].iloc[0],
+                "yearlyDownloads": x[["year", "count"]].to_dict(orient="records")
+            })
+            .tolist()
+        )
+
+        pd.DataFrame(nested).to_json(output_file, orient="records", lines=False)
         print(f"{output_file} file saved successfully!")
 
     def persist_top_download_counts(self, input_parquet, output_file, top_counts=100):
