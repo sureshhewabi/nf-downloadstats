@@ -45,7 +45,13 @@ class ParquetAnalyzer:
         self.persist_all_data(output_parquet, all_data)
 
     def persist_project_level_download_counts(self, df, output_file):
+        # Ensure final total count per accession
+        df = df.groupby("accession")["count"].sum().reset_index()
+
+        # Calculate percentiles
         df["percentile"] = (rankdata(df["count"], method="average") / len(df) * 100).astype(int)
+
+        # Sort and save
         df.sort_values(by="count", ascending=False).to_json(output_file, orient="records", lines=False)
         print(f"{output_file} file saved successfully!")
 
