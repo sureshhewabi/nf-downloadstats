@@ -1,4 +1,5 @@
 import logging
+from typing import List, Dict, Any, Optional
 import pyarrow.parquet as pq
 import pyarrow as pa
 
@@ -6,11 +7,12 @@ from exceptions import (
     ParquetWriteError,
     ValidationError
 )
+from interfaces import IParquetWriter
 
 logger = logging.getLogger(__name__)
 
 
-class ParquetWriter:
+class ParquetWriter(IParquetWriter):
     """
     Write parquet file
     """
@@ -33,7 +35,7 @@ class ParquetWriter:
 
     COMPRESSION = 'snappy'
 
-    def __init__(self, parquet_path: str, write_strategy: str = 'all', batch_size: int = 10000):
+    def __init__(self, parquet_path: str, write_strategy: str = 'all', batch_size: int = 10000) -> None:
         """
         Initialize ParquetWriter.
 
@@ -44,14 +46,14 @@ class ParquetWriter:
         if not parquet_path:
             raise ValidationError("parquet_path is required", field="parquet_path")
 
-        self.parquet_path = parquet_path
-        self.write_strategy = write_strategy.lower()
-        self.batch_size = batch_size
-        self.parquet_writer = None
-        self.batch_data = []
+        self.parquet_path: str = parquet_path
+        self.write_strategy: str = write_strategy.lower()
+        self.batch_size: int = batch_size
+        self.parquet_writer: Optional[pq.ParquetWriter] = None
+        self.batch_data: List[Dict[str, Any]] = []
 
     # METHOD 1
-    def write_all(self, data):
+    def write_all(self, data: List[Dict[str, Any]]) -> bool:
         """
         Write parquet file with schema
         :param data: array of data to write
@@ -87,7 +89,7 @@ class ParquetWriter:
             raise error
 
     # METHOD 2
-    def write_batch(self, data):
+    def write_batch(self, data: List[Dict[str, Any]]) -> bool:
         """
         Write data in batches to a Parquet file.
 
@@ -122,7 +124,7 @@ class ParquetWriter:
             logger.error("Error during write_batch", extra={"parquet_path": self.parquet_path, "error": str(e)}, exc_info=True)
             raise error
 
-    def _write_current_batch(self):
+    def _write_current_batch(self) -> None:
         """
         Write the current batch to the Parquet file.
         """
@@ -159,7 +161,7 @@ class ParquetWriter:
             logger.error("Error during _write_current_batch", extra={"parquet_path": self.parquet_path, "batch_size": len(self.batch_data[:self.batch_size]), "error": str(e)}, exc_info=True)
             raise error
 
-    def finalize(self):
+    def finalize(self) -> bool:
         """
         Finalize the writing process.
         Writes any remaining data and closes the writer.

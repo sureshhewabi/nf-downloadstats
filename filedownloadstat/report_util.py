@@ -1,14 +1,17 @@
 import logging
 from pathlib import Path
+from typing import Optional
+
+from interfaces import IReportGenerator
 
 logger = logging.getLogger(__name__)
 
 
-class Report:
+class Report(IReportGenerator):
 
     # Function to read HTML content from a file
     @staticmethod
-    def read_html_file(file_path):
+    def read_html_file(file_path: Path) -> str:
         try:
             with open(file_path, "r", encoding="utf-8") as file:
                 return file.read()
@@ -16,7 +19,7 @@ class Report:
             return f"<p>Missing content: {file_path}</p>"
 
     @staticmethod
-    def generate_report(template_path, output):
+    def generate_report(template_path: Path, output: Path) -> None:
 
         # Read the template HTML file
         with open(template_path, "r",
@@ -61,7 +64,7 @@ class Report:
         logger.info("Report generated successfully", extra={"output": output})
 
     @staticmethod
-    def copy_report(output, report_copy_filepath):
+    def copy_report(output: Path, report_copy_filepath: Path) -> None:
         """
         Open the original file to read and the new file to write
         """

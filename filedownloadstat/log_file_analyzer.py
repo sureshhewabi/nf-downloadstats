@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import plotly.express as px
 import pandas as pd
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 class LogFileAnalyzer:
 
     @staticmethod
-    def log_file_size_distribution(file):
+    def log_file_size_distribution(file: str) -> None:
         """
         Visualize how file sizes are distributed, identify outliers, and determine the average or median file size.
         """
@@ -46,7 +47,7 @@ class LogFileAnalyzer:
 
 
     @staticmethod
-    def run_log_file_stat(file, output):
+    def run_log_file_stat(file: str, output: str) -> None:
         """
         Run the log file statistics generation and save the visualizations in an HTML output file.
         """

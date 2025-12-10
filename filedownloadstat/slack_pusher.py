@@ -17,14 +17,15 @@ from exceptions import (
     SlackPushError,
     ValidationError
 )
+from interfaces import ISlackPusher
 
 logger = logging.getLogger(__name__)
 
 
-class SlackPusher:
+class SlackPusher(ISlackPusher):
     """Class for pushing reports to Slack."""
     
-    def __init__(self, webhook_url: str):
+    def __init__(self, webhook_url: str) -> None:
         """Initialize the Slack pusher.
         
         Args:
@@ -32,7 +33,7 @@ class SlackPusher:
         """
         if not webhook_url:
             raise ValidationError("webhook_url must be provided", field="webhook_url")
-        self.webhook_url = webhook_url
+        self.webhook_url: str = webhook_url
     
     def push_report(self, report_file: str, title: Optional[str] = None) -> bool:
         """Push consolidated report to Slack.

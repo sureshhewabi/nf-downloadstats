@@ -2,6 +2,7 @@ import gzip
 import os
 import sys
 import logging
+from typing import List, Optional, Callable
 from pathlib import Path
 
 from log_file_parser import LogFileParser
@@ -11,16 +12,33 @@ from exceptions import (
     ParquetWriteError,
     LogFileCorruptedError
 )
+from interfaces import IFileUtil
 
 logger = logging.getLogger(__name__)
 
 
-class FileUtil:
+class FileUtil(IFileUtil):
+    """
+    File utility class for processing log files.
+    Supports dependency injection for better testability.
+    """
 
-    def __init__(self):
-        pass
+    def __init__(
+        self,
+        parser_factory: Optional[Callable] = None,
+        writer_factory: Optional[Callable] = None
+    ) -> None:
+        """
+        Initialize FileUtil.
+        
+        Args:
+            parser_factory: Optional factory function for creating LogFileParser instances
+            writer_factory: Optional factory function for creating ParquetWriter instances
+        """
+        self._parser_factory = parser_factory or LogFileParser
+        self._writer_factory = writer_factory or ParquetWriter
 
-    def get_file_paths(self, root_dir):
+    def get_file_paths(self, root_dir: str) -> List[str]:
         """
         Traverse the directory tree and retrieve all file paths.
         Handles variable folder depth safely using pathlib.
@@ -31,7 +49,13 @@ class FileUtil:
         return [str(file) for file in root_path.rglob("*.tsv.gz")]
 
 
-    def process_access_methods(self, root_directory: str, file_paths_list: str, protocols: list, public_list: list):
+    def process_access_methods(
+        self,
+        root_directory: str,
+        file_paths_list: str,
+        protocols: List[str],
+        public_list: List[str]
+    ) -> str:
         """
         Process logs and generate Parquet files for each file in the specified access method directories.
         """
@@ -70,8 +94,15 @@ class FileUtil:
         logger.info("File metadata written", extra={"output_file": file_paths_list, "file_count": len(file_metadata)})
         return file_paths_list
 
-    def process_log_file(self, file_path: str, parquet_output_file: str, resource_list: list, completeness_list: list,
-                         batch_size: int, accession_pattern_list: list):
+    def process_log_file(
+        self,
+        file_path: str,
+        parquet_output_file: str,
+        resource_list: List[str],
+        completeness_list: List[str],
+        batch_size: int,
+        accession_pattern_list: List[str]
+    ) -> None:
         data_written = False
         try:
             logger.info("Parsing log file started", extra={"file_path": file_path, "output_file": parquet_output_file})
@@ -82,8 +113,8 @@ class FileUtil:
                     file_path=file_path
                 )
 
-            lp = LogFileParser(file_path, resource_list, completeness_list, accession_pattern_list)
-            writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
+            lp = self._parser_factory(file_path, resource_list, completeness_list, accession_pattern_list)
+            writer = self._writer_factory(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
 
             for batch in lp.parse_gzipped_tsv(batch_size):
                 if writer.write_batch(batch):

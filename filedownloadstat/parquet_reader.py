@@ -1,23 +1,26 @@
 import logging
+from typing import Optional
 import pyarrow.parquet as pq
+import pyarrow as pa
 
 from exceptions import (
     ParquetReadError,
     ValidationError
 )
+from interfaces import IParquetReader
 
 logger = logging.getLogger(__name__)
 
 
-class ParquetReader:
+class ParquetReader(IParquetReader):
     """
     Read parquet file
     """
 
-    def __init__(self, parquet_path: str = None):
-        self.parquet_path = parquet_path
+    def __init__(self, parquet_path: Optional[str] = None) -> None:
+        self.parquet_path: Optional[str] = parquet_path
 
-    def read(self, parquet_path):
+    def read(self, parquet_path: str) -> pa.Table:
         """
         Read parquet file or dataset
         :param parquet_path: Path to the Parquet file or dataset

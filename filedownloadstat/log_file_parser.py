@@ -1,8 +1,11 @@
 import gzip
 import re
 import logging
-from datetime import datetime
+from typing import Iterator, List, Dict, Any, Optional, Set
+from datetime import datetime, date
 import warnings
+
+from interfaces import ILogParser
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="dask.dataframe")
@@ -10,7 +13,7 @@ warnings.filterwarnings("ignore", category=FutureWarning, module="dask.dataframe
 logger = logging.getLogger(__name__)
 
 
-class LogFileParser:
+class LogFileParser(ILogParser):
     """
     Class to parse the log file into parquet format
     eg: 2024-01-01T02:26:59.000Z\tebea3f4b11d3388b6da48148eb3a39a577bdc4bf\t179163579\t/pride/data/archive/2023/03/PXD034241/20210205_QExHFX3_RSLC10_Feng_Heckmann_EXT_onbead_dig_30_per_sample_turbo_nobio_S3_5.raw\tOUT\t03dbae9a96db63fa62487cd3c134d05230858127\tPartial\tChina\tShaanxi\tXi'an\t34.3287,109.0337\thttp\tpublic
@@ -18,13 +21,19 @@ class LogFileParser:
 
     DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
-    def __init__(self, file_path, resource_list, completeness_list, accession_pattern_list):
-        self.file_path = file_path
-        self.RESOURCE_IDENTIFIERS = resource_list
-        self.completeness = {c.lower().strip() for c in completeness_list}
-        self.accession_pattern_list = accession_pattern_list
+    def __init__(
+        self,
+        file_path: str,
+        resource_list: List[str],
+        completeness_list: List[str],
+        accession_pattern_list: List[str]
+    ) -> None:
+        self.file_path: str = file_path
+        self.RESOURCE_IDENTIFIERS: List[str] = resource_list
+        self.completeness: Set[str] = {c.lower().strip() for c in completeness_list}
+        self.accession_pattern_list: List[str] = accession_pattern_list
 
-    def parse_gzipped_tsv(self, batch_size: int ):
+    def parse_gzipped_tsv(self, batch_size: int) -> Iterator[List[Dict[str, Any]]]:
         """
         Read the gzipped TSV file, parse each line, and yield data in batches.
         :param batch_size: Number of rows to include in each batch.
@@ -50,7 +59,7 @@ class LogFileParser:
         except Exception as e:
             logger.error("Exception while processing file", extra={"file_path": self.file_path, "error": str(e)}, exc_info=True)
 
-    def is_relevant_row(self, row):
+    def is_relevant_row(self, row: List[str]) -> bool:
         """
         Checks if the row matches the criteria based on resource identifiers and completeness.
         :param row: List of row values
@@ -74,7 +83,7 @@ class LogFileParser:
         else:
             return False
 
-    def get_accession(self, path):
+    def get_accession(self, path: str) -> Optional[str]:
         """
         Searches for an accession number in the given path.
 
@@ -97,7 +106,7 @@ class LogFileParser:
 
         return None  # No match found or an error occurred
 
-    def parse_row(self, row, line_no):
+    def parse_row(self, row: List[str], line_no: int) -> Optional[Dict[str, Any]]:
         """
         Define a function to parse each row by extracting fields by column index
         :param row:
@@ -134,14 +143,13 @@ class LogFileParser:
                     logger.error("Error processing line", extra={"line_no": line_no, "row": row, "error": str(e)})
                     raise IndexError(f"IndexError: Row {line_no} with insufficient columns: {row}. Error: {e}")
             else:
-                # print(f"Row not relevant at line {line_no}: {row}")
                 return None
         else:
             logger.warning("Unexpected column count", extra={"line_no": line_no, "expected": 13, "found": len(row), "row": row})
             return None
 
     @staticmethod
-    def clean_timestamp(timestamp):
+    def clean_timestamp(timestamp: str) -> str:
         """
         Cleans and adjusts the timestamp format for parsing.
         eg: 2024-09-13T23:58:17.000Z / 2024-09-14T07:14:07.419698061Z
