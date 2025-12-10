@@ -1,5 +1,8 @@
+import logging
 import pyarrow.parquet as pq
 import pyarrow as pa
+
+logger = logging.getLogger(__name__)
 
 
 class ParquetWriter:
@@ -62,7 +65,7 @@ class ParquetWriter:
                 return True
             return False
         except Exception as e:
-            print(f"Error during write_all: {e}")
+            logger.error("Error during write_all", extra={"parquet_path": self.parquet_path, "error": str(e)}, exc_info=True)
             raise
 
     # METHOD 2
@@ -85,7 +88,7 @@ class ParquetWriter:
             return data_written
 
         except Exception as e:
-            print(f"Error during write_batch: {e}")
+            logger.error("Error during write_batch", extra={"parquet_path": self.parquet_path, "error": str(e)}, exc_info=True)
             raise
 
     def _write_current_batch(self):
@@ -108,7 +111,7 @@ class ParquetWriter:
             self.batch_data = self.batch_data[self.batch_size:]
 
         except Exception as e:
-            print(f"Error during _write_current_batch: {e}")
+            logger.error("Error during _write_current_batch", extra={"parquet_path": self.parquet_path, "batch_size": len(self.batch_data[:self.batch_size]), "error": str(e)}, exc_info=True)
             raise
 
     def finalize(self):
@@ -128,5 +131,5 @@ class ParquetWriter:
                 self.parquet_writer.close()
             return data_written
         except Exception as e:
-            print(f"Error during finalize: {e}")
+            logger.error("Error during finalize", extra={"parquet_path": self.parquet_path, "error": str(e)}, exc_info=True)
             raise

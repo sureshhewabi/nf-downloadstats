@@ -1,5 +1,8 @@
+import logging
 import plotly.express as px
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 class LogFileAnalyzer:
@@ -39,7 +42,7 @@ class LogFileAnalyzer:
             labels={"size": "File Size (Bytes)", "protocol": "Protocol Type"},
         )
         fig.write_html("file_size_violin_by_protocol.html")
-        print("Violin plot written to file_size_violin_by_protocol.html")
+        logger.info("Violin plot written", extra={"output_file": "file_size_violin_by_protocol.html"})
 
 
     @staticmethod

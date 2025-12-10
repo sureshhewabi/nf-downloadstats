@@ -1,10 +1,13 @@
 import gzip
 import os
 import sys
+import logging
 from pathlib import Path
 
 from log_file_parser import LogFileParser
 from parquet_writer import ParquetWriter
+
+logger = logging.getLogger(__name__)
 
 
 class FileUtil:
@@ -59,19 +62,17 @@ class FileUtil:
                     f"{metadata['path']}\t{metadata['filename']}\t{metadata['size']}\t{metadata['protocol']}\n"
                 )
 
-        print(f"File metadata written to {file_paths_list}")
+        logger.info("File metadata written", extra={"output_file": file_paths_list, "file_count": len(file_metadata)})
         return file_paths_list
 
     def process_log_file(self, file_path: str, parquet_output_file: str, resource_list: list, completeness_list: list,
                          batch_size: int, accession_pattern_list: list):
         data_written = False
         try:
-            print(f"Parsing log file started: {file_path}")
+            logger.info("Parsing log file started", extra={"file_path": file_path, "output_file": parquet_output_file})
 
             if not os.path.exists(file_path):
                 raise FileNotFoundError(f"Input file does not exist: {file_path}")
-
-            print(f"Parsing file and writing output to {parquet_output_file}")
 
             lp = LogFileParser(file_path, resource_list, completeness_list, accession_pattern_list)
             writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
@@ -85,9 +86,9 @@ class FileUtil:
                 data_written = True
 
             if data_written:
-                print(f"Parquet file written to {parquet_output_file} for {file_path}")
+                logger.info("Parquet file written successfully", extra={"file_path": file_path, "output_file": parquet_output_file})
             else:
-                print(f"No data found to write :  {file_path}")
+                logger.warning("No data found to write", extra={"file_path": file_path})
         except Exception as e:
-            print(f"Error while processing file: {e}", file=sys.stderr)
+            logger.error("Error while processing file", extra={"file_path": file_path, "error": str(e)}, exc_info=True)
             sys.exit(1)

@@ -1,4 +1,7 @@
+import logging
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 
 class Report:
@@ -55,7 +58,7 @@ class Report:
         with open(output, "w", encoding="utf-8") as output_file:
             output_file.write(final_report)
 
-        print(f"Report generated successfully: {output}")
+        logger.info("Report generated successfully", extra={"output": output})
 
     @staticmethod
     def copy_report(output, report_copy_filepath):
@@ -67,4 +70,4 @@ class Report:
             for line in original_file:
                 new_file.write(line)
 
-        print(f"File has been copied to {file_copy}")
+        logger.info("File copied successfully", extra={"source": output, "destination": str(file_copy)})

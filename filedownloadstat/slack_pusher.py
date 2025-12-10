@@ -8,9 +8,12 @@ to Slack via webhook URL.
 
 import json
 import sys
+import logging
 import requests
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 class SlackPusher:
@@ -66,17 +69,17 @@ class SlackPusher:
             response = requests.post(self.webhook_url, json=payload, timeout=30)
             
             if response.status_code == 200:
-                print(f"✅ Successfully pushed report to Slack via webhook")
+                logger.info("Successfully pushed report to Slack", extra={"report_file": report_file, "title": message_title})
                 return True
             else:
-                print(f"❌ Failed to push to Slack: {response.status_code} {response.text}", file=sys.stderr)
+                logger.error("Failed to push to Slack", extra={"report_file": report_file, "status_code": response.status_code, "response": response.text})
                 return False
                 
         except FileNotFoundError:
-            print(f"Error: {report_file} not found", file=sys.stderr)
+            logger.error("Report file not found", extra={"report_file": report_file})
             return False
         except Exception as e:
-            print(f"Error pushing to Slack: {e}", file=sys.stderr)
+            logger.error("Error pushing to Slack", extra={"report_file": report_file, "error": str(e)}, exc_info=True)
             return False
 
 

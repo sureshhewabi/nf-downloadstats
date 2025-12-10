@@ -1,10 +1,13 @@
 import gzip
 import re
+import logging
 from datetime import datetime
 import warnings
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=FutureWarning, module="dask.dataframe")
+
+logger = logging.getLogger(__name__)
 
 
 class LogFileParser:
@@ -43,9 +46,9 @@ class LogFileParser:
                 if batch:
                     yield batch
         except OSError as e:
-            print(f"Skipping corrupted file: {self.file_path} due to {e}")
+            logger.warning("Skipping corrupted file", extra={"file_path": self.file_path, "error": str(e)})
         except Exception as e:
-            print(f"Got an exception while processing file {self.file_path}: {e}")
+            logger.error("Exception while processing file", extra={"file_path": self.file_path, "error": str(e)}, exc_info=True)
 
     def is_relevant_row(self, row):
         """
@@ -88,9 +91,9 @@ class LogFileParser:
                 if match:
                     return match.group()
         except re.error as regex_err:
-            print(f"Regex error: {regex_err} | Pattern: {pattern}")
+            logger.error("Regex error in get_accession", extra={"pattern": pattern, "error": str(regex_err)})
         except Exception as e:
-            print(f"Unexpected error in get_accession: {e}")
+            logger.error("Unexpected error in get_accession", extra={"error": str(e)}, exc_info=True)
 
         return None  # No match found or an error occurred
 
@@ -128,13 +131,13 @@ class LogFileParser:
                         "geo_location": row[10].strip() if row[10] else "",  # Geo location coordinates (e.g., 34.3287,109.0337)
                     }
                 except IndexError as e:
-                    print(f"Error processing line {line_no} with row {row}: {e}")
+                    logger.error("Error processing line", extra={"line_no": line_no, "row": row, "error": str(e)})
                     raise IndexError(f"IndexError: Row {line_no} with insufficient columns: {row}. Error: {e}")
             else:
                 # print(f"Row not relevant at line {line_no}: {row}")
                 return None
         else:
-            print(f"WARNING: Expected 13 columns but found {len(row)} columns at line {line_no}. Row: {row}")
+            logger.warning("Unexpected column count", extra={"line_no": line_no, "expected": 13, "found": len(row), "row": row})
             return None
 
     @staticmethod

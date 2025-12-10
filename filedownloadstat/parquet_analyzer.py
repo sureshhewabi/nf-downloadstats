@@ -1,8 +1,11 @@
 import os
+import logging
 import pandas as pd
 import pyarrow.parquet as pq
 import pyarrow as pa
 from scipy.stats import rankdata
+
+logger = logging.getLogger(__name__)
 
 
 class ParquetAnalyzer:
@@ -53,11 +56,11 @@ class ParquetAnalyzer:
 
         # Sort and save
         df.sort_values(by="count", ascending=False).to_json(output_file, orient="records", lines=False)
-        print(f"{output_file} file saved successfully!")
+        logger.info("Project level download counts saved", extra={"output_file": output_file, "record_count": len(df)})
 
     def persist_file_level_download_counts(self, df, output_file):
         df.to_json(output_file, orient="records", lines=False)
-        print(f"{output_file} file saved successfully!")
+        logger.info("File level download counts saved", extra={"output_file": output_file, "record_count": len(df)})
 
     def persist_project_level_yearly_download_counts(self, df, output_file):
         # Group by accession and year and sum the counts
@@ -75,7 +78,7 @@ class ParquetAnalyzer:
         )
 
         pd.DataFrame(nested).to_json(output_file, orient="records", lines=False)
-        print(f"{output_file} file saved successfully!")
+        logger.info("Project level yearly download counts saved", extra={"output_file": output_file, "record_count": len(nested)})
 
     def persist_top_download_counts(self, input_parquet, output_file, top_counts=100):
         """Processes Parquet file batch-wise to determine top downloads."""
@@ -90,17 +93,19 @@ class ParquetAnalyzer:
         result = pd.DataFrame(list(counts.items()), columns=["accession", "count"])
         top_count_dataset = result.sort_values("count", ascending=False).head(top_counts)
         top_count_dataset.to_json(output_file, orient="records", lines=False)
-        print(f"{output_file} file saved successfully!")
+        logger.info("Top download counts saved", extra={"output_file": output_file, "top_count": len(top_count_dataset)})
 
     def persist_all_data(self, input_parquet, output_file):
         """Reads and saves all data batch-wise to avoid memory issues."""
         file_iter = pq.ParquetFile(input_parquet).iter_batches(batch_size=self.batch_size)
 
+        record_count = 0
         with open(output_file, "w") as f:
             for batch in file_iter:
                 df = batch.to_pandas()
                 f.write(df.to_json(orient="records", lines=True))  # **Append JSON records batch-wise**
-        print(f"All data saved to {output_file}")
+                record_count += len(df)
+        logger.info("All data saved", extra={"output_file": output_file, "record_count": record_count})
 
     def get_all_parquet_files(self, file_list_path):
         """Reads file paths from a text file and validates them as Parquet files."""
@@ -108,13 +113,15 @@ class ParquetAnalyzer:
             file_paths = [line.strip() for line in f.readlines()]
 
         all_parquet_files = [p for p in file_paths if os.path.isfile(p) and p.endswith(".parquet")]
-        return all_parquet_files if all_parquet_files else print("Warning: No valid Parquet files found.")
+        if not all_parquet_files:
+            logger.warning("No valid Parquet files found", extra={"file_list_path": file_list_path})
+        return all_parquet_files
 
     def merge_parquet_files(self, input_files, output_parquet):
         """Merges Parquet files in batches with schema consistency."""
         all_files = self.get_all_parquet_files(input_files)
         if not all_files:
-            print("No valid Parquet files found. Exiting.")
+            logger.warning("No valid Parquet files found. Exiting.", extra={"input_files": input_files})
             return
 
         writer = None
@@ -134,4 +141,4 @@ class ParquetAnalyzer:
 
         if writer:
             writer.close()
-        print(f"Merged Parquet dataset saved at: {output_parquet}")
+        logger.info("Merged Parquet dataset saved", extra={"output_file": output_parquet, "input_file_count": len(all_files)})

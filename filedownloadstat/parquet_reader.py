@@ -1,4 +1,7 @@
+import logging
 import pyarrow.parquet as pq
+
+logger = logging.getLogger(__name__)
 
 
 class ParquetReader:
@@ -21,10 +24,9 @@ class ParquetReader:
         # Read the dataset (directory of Parquet files)
         read_table = pq.read_table(parquet_path)
 
-        # Print metadata
-        print("Metadata:", read_table.schema.metadata)
-        print("Schema:", read_table.schema)
-        print("Data:")
-        print(read_table.to_pandas())  # Convert to pandas DataFrame for easier inspection
+        # Log metadata
+        logger.info("Parquet file read successfully", extra={"parquet_path": parquet_path})
+        logger.debug("Parquet metadata", extra={"metadata": str(read_table.schema.metadata), "schema": str(read_table.schema)})
+        logger.debug("Parquet data preview", extra={"row_count": len(read_table.to_pandas())})
 
         return read_table
