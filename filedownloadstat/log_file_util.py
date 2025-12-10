@@ -6,6 +6,11 @@ from pathlib import Path
 
 from log_file_parser import LogFileParser
 from parquet_writer import ParquetWriter
+from exceptions import (
+    LogFileNotFoundError,
+    ParquetWriteError,
+    LogFileCorruptedError
+)
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +77,10 @@ class FileUtil:
             logger.info("Parsing log file started", extra={"file_path": file_path, "output_file": parquet_output_file})
 
             if not os.path.exists(file_path):
-                raise FileNotFoundError(f"Input file does not exist: {file_path}")
+                raise LogFileNotFoundError(
+                    f"Input file does not exist: {file_path}",
+                    file_path=file_path
+                )
 
             lp = LogFileParser(file_path, resource_list, completeness_list, accession_pattern_list)
             writer = ParquetWriter(parquet_path=parquet_output_file, write_strategy='batch', batch_size=batch_size)
@@ -89,6 +97,19 @@ class FileUtil:
                 logger.info("Parquet file written successfully", extra={"file_path": file_path, "output_file": parquet_output_file})
             else:
                 logger.warning("No data found to write", extra={"file_path": file_path})
-        except Exception as e:
+        except LogFileNotFoundError:
+            # Re-raise as-is - this is a fatal error
+            raise
+        except (LogFileCorruptedError, ParquetWriteError) as e:
+            # Re-raise specific errors
             logger.error("Error while processing file", extra={"file_path": file_path, "error": str(e)}, exc_info=True)
-            sys.exit(1)
+            raise
+        except Exception as e:
+            # Wrap unexpected errors
+            error = LogFileCorruptedError(
+                f"Unexpected error processing file: {file_path}",
+                file_path=file_path,
+                original_error=str(e)
+            )
+            logger.error("Error while processing file", extra={"file_path": file_path, "error": str(e)}, exc_info=True)
+            raise error

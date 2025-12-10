@@ -5,6 +5,12 @@ import pyarrow.parquet as pq
 import pyarrow as pa
 from scipy.stats import rankdata
 
+from exceptions import (
+    ParquetReadError,
+    ParquetMergeError,
+    AnalysisError
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -119,26 +125,45 @@ class ParquetAnalyzer:
 
     def merge_parquet_files(self, input_files, output_parquet):
         """Merges Parquet files in batches with schema consistency."""
-        all_files = self.get_all_parquet_files(input_files)
-        if not all_files:
-            logger.warning("No valid Parquet files found. Exiting.", extra={"input_files": input_files})
-            return
+        try:
+            all_files = self.get_all_parquet_files(input_files)
+            if not all_files:
+                raise ParquetMergeError(
+                    "No valid Parquet files found to merge",
+                    input_files=input_files
+                )
 
-        writer = None
-        first_schema = None
+            writer = None
+            first_schema = None
 
-        for file in all_files:
-            file_iter = pq.ParquetFile(file).iter_batches(batch_size=self.batch_size)
-            for batch in file_iter:
-                df = batch.to_pandas()
+            for file in all_files:
+                file_iter = pq.ParquetFile(file).iter_batches(batch_size=self.batch_size)
+                for batch in file_iter:
+                    df = batch.to_pandas()
 
-                if writer is None:
-                    first_schema = pa.Table.from_pandas(df).schema  # Capture schema from first batch
-                    writer = pq.ParquetWriter(output_parquet, first_schema)
+                    if writer is None:
+                        first_schema = pa.Table.from_pandas(df).schema  # Capture schema from first batch
+                        writer = pq.ParquetWriter(output_parquet, first_schema)
 
-                table = pa.Table.from_pandas(df, schema=first_schema)  # Ensure schema consistency
-                writer.write_table(table)
+                    table = pa.Table.from_pandas(df, schema=first_schema)  # Ensure schema consistency
+                    writer.write_table(table)
 
-        if writer:
-            writer.close()
-        logger.info("Merged Parquet dataset saved", extra={"output_file": output_parquet, "input_file_count": len(all_files)})
+            if writer:
+                writer.close()
+            logger.info("Merged Parquet dataset saved", extra={"output_file": output_parquet, "input_file_count": len(all_files)})
+        except (IOError, OSError, pa.ArrowInvalid) as e:
+            error = ParquetMergeError(
+                f"Failed to merge Parquet files: {str(e)}",
+                input_files=input_files,
+                original_error=str(e)
+            )
+            logger.error("Error merging Parquet files", extra={"input_files": input_files, "error": str(e)}, exc_info=True)
+            raise error
+        except Exception as e:
+            error = ParquetMergeError(
+                f"Unexpected error merging Parquet files: {str(e)}",
+                input_files=input_files,
+                original_error=str(e)
+            )
+            logger.error("Unexpected error merging Parquet files", extra={"input_files": input_files, "error": str(e)}, exc_info=True)
+            raise error

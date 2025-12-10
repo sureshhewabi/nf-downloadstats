@@ -124,11 +124,16 @@ def run_log_file_stat(file: str, output: str):
     required=True,
 )
 def read_parquet_files(file: str):
+    from exceptions import ParquetReadError
+    
     if os.path.exists(file):
         parquet_reader = ParquetReader(file)
         parquet_reader.read(file)
     else:
-        raise FileNotFoundError(file)
+        raise ParquetReadError(
+            f"Parquet file not found: {file}",
+            parquet_path=file
+        )
 
 
 @click.command(
