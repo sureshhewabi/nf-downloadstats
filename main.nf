@@ -200,11 +200,15 @@ process push_to_slack {
     path "slack_push_status.txt"  // Status of the Slack push
 
     script:
+    def botToken = params.slack_bot_token ? "--bot-token \"${params.slack_bot_token}\"" : ""
+    def channel = params.slack_channel ? "--channel \"${params.slack_channel}\"" : ""
     """
     python3 ${workflow.projectDir}/filedownloadstat/slack_pusher.py \
         --input-file ${report_file} \
         --webhook-url "${params.slack_webhook_url}" \
-        --title "${params.slack_title}" > slack_push_status.txt 2>&1
+        --title "${params.slack_title}" \
+        ${botToken} \
+        ${channel} > slack_push_status.txt 2>&1
     """
 }
 
