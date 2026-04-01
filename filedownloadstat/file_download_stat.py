@@ -1,4 +1,5 @@
 import os
+import re
 import click
 from typing import Optional
 
@@ -97,7 +98,7 @@ def process_log_file(
 ) -> None:
     resource_list = resource.split(",")
     completeness_list = complete.split(",")
-    accession_pattern_list = accession_pattern.split(",")
+    accession_pattern_list = re.split(r',(?![^{}]*\})', accession_pattern)
     fileutil = FileUtil()
     fileutil.process_log_file(tsvfilepath, output_parquet, resource_list, completeness_list, batch, accession_pattern_list)
 

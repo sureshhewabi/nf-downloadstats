@@ -15,6 +15,13 @@ params.output_file='parsed_data.parquet'
 params.log_file=''
 params.api_endpoint_file_download_per_project=''
 params.protocols=''
+params.slack_webhook_url=''
+params.slack_bot_token=''
+params.slack_channel=''
+params.slack_title=''
+params.api_endpoint_file_downloads_per_project=''
+params.api_endpoint_file_downloads_per_file=''
+params.api_endpoint_header=''
 
 
 

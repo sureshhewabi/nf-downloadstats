@@ -96,8 +96,7 @@ class ReportStat:
     def user_stats(df: pd.DataFrame) -> None:
         # Calculate unique users per date
         user_data = df.groupby(['date', 'year', 'month'], as_index=False)['user'].nunique()
-        user_data['date'] = pd.to_datetime(user_data['date'], unit='ms')  # Convert date to datetime
-        # user_data['date'] = pd.to_datetime(user_data['date'], format='%Y-%m-%d')  # Use the correct format
+        user_data['date'] = pd.to_datetime(user_data['date'])
 
         UserStat.unique_users_over_time(user_data)
 
@@ -121,12 +120,13 @@ class ReportStat:
         logger.info("Loading data from Parquet", extra={"file": file})
 
         df = dd.read_parquet(file)
-        df_computed = df.compute()
-        logger.debug("Parquet data preview", extra={"file": file, "row_count": len(df_computed)})
-        
+
         # Filter out rows where 'year' is in skipped_years_list
-        df = df[~df["year"].isin(skipped_years_list)]
+        if skipped_years_list:
+            df = df[~df["year"].isin(skipped_years_list)]
+
         df_pandas = df.compute()
+        logger.debug("Parquet data loaded", extra={"file": file, "row_count": len(df_pandas)})
 
         # Convert 'date' to Pandas datetime format
         df_pandas['date'] = pd.to_datetime(df_pandas['date'])

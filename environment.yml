@@ -21,3 +21,5 @@ dependencies:
       - pyyaml
       - scipy
       - panel
+      - click
+      - requests

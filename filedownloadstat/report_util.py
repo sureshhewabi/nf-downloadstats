@@ -36,7 +36,7 @@ class Report(IReportGenerator):
         )
 
         trends_content = (
-            Report.read_html_file("download_over_treands.html")  # Correct the filename if needed
+            Report.read_html_file("download_over_trends.html")  # Correct the filename if needed
         )
 
         maps_content = (
