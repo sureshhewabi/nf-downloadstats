@@ -11,12 +11,13 @@ public_private:
 resource_identifiers:
   - /pub/databases/metabolights/studies/
 accession_pattern:
+  - 'MTBLS\\d{4}'
   - 'MTBLS\\d{5}'
 completeness:
   - complete
 ############# Statistics Reports #############
 
-report_template: "pride_report.html"
+report_template: "metab_report.html"
 skipped_years:
   - 2020
   - 2025
