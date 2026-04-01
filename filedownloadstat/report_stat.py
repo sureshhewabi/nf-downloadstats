@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from stat_types import ProjectStat, RegionalStat, TrendsStat, UserStat
+from stat_types import ProjectStat, RegionalStat, TrendsStat, UserStat, BotStat
 from report_util import Report
 import pandas as pd
 import dask.dataframe as dd
@@ -106,13 +106,43 @@ class ReportStat:
         UserStat.users_by_country(country_user_data)
 
     @staticmethod
+    def bot_stats(df: pd.DataFrame) -> None:
+        """Generate bot classification statistics. Requires is_bot, is_hub, is_organic columns."""
+        # Derive classification label from boolean columns
+        def get_classification(row):
+            if row.get('is_bot', False):
+                return 'bot'
+            elif row.get('is_hub', False):
+                return 'hub'
+            else:
+                return 'organic'
+
+        df = df.copy()
+        df['classification'] = df.apply(get_classification, axis=1)
+
+        # 1. Overall distribution
+        classification_counts = df.groupby('classification').size().reset_index(name='count')
+        BotStat.classification_distribution(classification_counts)
+
+        # 2. Classification by year
+        yearly_classification = df.groupby(['year', 'classification']).size().reset_index(name='count')
+        BotStat.classification_by_year(yearly_classification)
+
+        # 3. Organic downloads by country
+        organic_df = df[df['classification'] == 'organic']
+        country_organic = organic_df.groupby('country').size().reset_index(name='count')
+        country_organic = country_organic.sort_values('count', ascending=False)
+        BotStat.organic_downloads_by_country(country_organic)
+
+    @staticmethod
     def run_file_download_stat(
         file: str,
         output: str,
         report_template: str,
         baseurl: str,
         report_copy_filepath: Optional[str],
-        skipped_years_list: List[int]
+        skipped_years_list: List[int],
+        enable_bot_classification: bool = False
     ) -> None:
         """
         Run the log file statistics generation and save the visualizations in an HTML output file.
@@ -136,10 +166,18 @@ class ReportStat:
         ReportStat.regional_stats(df_pandas)
         ReportStat.user_stats(df_pandas)
 
+        # Generate bot classification stats if the annotated columns are present
+        has_bot_columns = all(col in df_pandas.columns for col in ['is_bot', 'is_hub', 'is_organic'])
+        if enable_bot_classification and has_bot_columns:
+            ReportStat.bot_stats(df_pandas)
+            logger.info("Bot classification stats generated")
+        elif enable_bot_classification:
+            logger.warning("Bot classification enabled but is_bot/is_hub/is_organic columns not found in parquet")
+
         template_path = Path(__file__).resolve().parent.parent / "template" / report_template
 
         logger.info("Looking for template", extra={"template_path": str(template_path)})
-        Report.generate_report(template_path, output)
+        Report.generate_report(template_path, output, enable_bot_classification=enable_bot_classification)
 
         if report_copy_filepath and Path(report_copy_filepath).is_dir():
             Report.copy_report(output, report_copy_filepath)
