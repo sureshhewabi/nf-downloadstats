@@ -139,7 +139,7 @@ process merge_parquet_files {
     label 'error_retry_medium'
 
     input:
-    val all_parquet_files  // A comma-separated string of file paths
+    val all_parquet_files  // A comma-separated string of file paths.
 
     output:
     path("output_parquet"), emit: output_parquet
